@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Backend.Domain.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Application.Dtos
 {
@@ -19,6 +20,7 @@ namespace Backend.Application.Dtos
         public string Role { get; set; } = null!;
 
         public int? ManagerId { get; set; }
+
     }
 
     public class LoginUserDto

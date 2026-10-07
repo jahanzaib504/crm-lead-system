@@ -1,6 +1,7 @@
 ﻿using Backend.Domain.Interfaces;
 using Backend.Domain.Models;
 using Backend.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace Backend.Infrastructure.Repositories
@@ -17,6 +18,11 @@ namespace Backend.Infrastructure.Repositories
         public async Task<User?> GetByIdAsync(int id)
         {
             return await _context.Users.FindAsync(id);
+        }
+
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _context.Users.SingleOrDefaultAsync(u=>u.Email==email);
         }
 
         public async Task<User> CreateAsync(User user)
