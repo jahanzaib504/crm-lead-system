@@ -2,9 +2,11 @@
 
 
 using Backend.Api.Middlewares;
+using Backend.Application;
 using Backend.Application.Services;
 using Backend.Domain.Interfaces;
 using Backend.Domain.Models;
+using Backend.Infrastructure;
 using Backend.Infrastructure.Data;
 using Backend.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -58,18 +60,18 @@ builder.Services.AddAuthorization();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
-// Add repositries
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 
 
 // Adding password hasher
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
+
+// Add Infrastructure 
+builder.Services.AddInfrastructureServices();
+
 // Add application services
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<TokenService>();
-
-
+builder.Services.AddApplicationServices();
 
 
 
