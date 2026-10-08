@@ -24,8 +24,10 @@ builder.Services.AddControllers();
 
 
 // Add db context
-var connectionString = builder.Configuration.GetConnectionString("ConnectionStrings");
+var connectionString = builder.Configuration.GetSection("ConnectionStrings")["DefaultConnection"];
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+
+
 
 // Use jwt
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -88,6 +90,8 @@ app.UseExceptionHandler();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+
 
 app.MapControllers();
 

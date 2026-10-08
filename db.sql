@@ -61,6 +61,9 @@ CREATE TABLE dbo.Companies (
     AnnualRevenue DECIMAL(18,2) NULL,
     Website NVARCHAR(200) NULL,
     Phone NVARCHAR(30) NULL,
+
+
+
     CreatedAt DATETIME2 NOT NULL CONSTRAINT DF_Companies_CreatedAt DEFAULT SYSUTCDATETIME(),
     CreatedBy NVARCHAR(100) NOT NULL DEFAULT 'SystemSeed',
     UpdatedAt DATETIME2 NULL,

@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".http" />
+  </Folder>
   <Project Path="Backend.Api/Backend.Api.csproj" />
   <Project Path="Backend.Application/Backend.Application.csproj" />
   <Project Path="Backend.Domain/Backend.Domain.csproj" />

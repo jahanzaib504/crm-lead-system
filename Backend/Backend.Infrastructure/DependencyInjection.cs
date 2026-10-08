@@ -12,6 +12,7 @@ namespace Backend.Infrastructure
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
         {
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ILeadRepository,  LeadRepository>();
             return services;
         }
 

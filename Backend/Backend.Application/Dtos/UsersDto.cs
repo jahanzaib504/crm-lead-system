@@ -16,11 +16,10 @@ namespace Backend.Application.Dtos
         [Required, MinLength(8), MaxLength(100)]
         public string Password { get; set; } = null!;
 
-        [Required]
+        [Required, AllowedValues(["Sales Rep", "Sales Manager"])]
         public string Role { get; set; } = null!;
 
-        public int? ManagerId { get; set; }
-
+      
     }
 
     public class LoginUserDto

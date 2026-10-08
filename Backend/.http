@@ -1,0 +1,9 @@
+###
+POST http://localhost:5220/auth/register
+Content-type: application/json
+{
+  "fullName": "Jahanzaib",
+  "email": "jahanzaibawan2008@gmail.com",
+  "password": "iuauhsfu",
+  "role": "Admin"
+}
