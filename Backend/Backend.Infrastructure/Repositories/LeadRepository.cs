@@ -71,12 +71,13 @@ namespace Backend.Infrastructure.Repositories
         }
 
         // Update an existing Lead
-        public async Task UpdateAsync(Lead lead)
+        public async Task<Lead> UpdateAsync(Lead lead)
         {
             if (lead == null) throw new ArgumentNullException(nameof(lead));
 
             _context.Leads.Update(lead);
             await _context.SaveChangesAsync();
+            return lead;
         }
 
         // Delete a Lead by ID

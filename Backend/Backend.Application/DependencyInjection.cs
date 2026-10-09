@@ -12,6 +12,7 @@ namespace Backend.Application
         {
             services.AddScoped<AuthService>();
             services.AddScoped<TokenService>();
+            services.AddScoped<ILeadService, LeadService>();
             return services;
         }            
     }

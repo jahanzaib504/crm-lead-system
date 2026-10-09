@@ -15,7 +15,7 @@ public partial class Lead
 
     public int LeadStageId { get; set; }
 
-    public int AssignedToUserId { get; set; }
+    public int? AssignedToUserId { get; set; }
 
     public string Source { get; set; } = null!;
 
@@ -37,7 +37,7 @@ public partial class Lead
 
     public virtual ICollection<Activity> Activities { get; set; } = new List<Activity>();
 
-    public virtual User AssignedToUser { get; set; } = null!;
+    public virtual User? AssignedToUser { get; set; }
 
     public virtual Company? Company { get; set; }
 

@@ -38,7 +38,7 @@ CREATE TABLE dbo.Users (
     Email NVARCHAR(150) NOT NULL,
     PasswordHash NVARCHAR(MAX) NOT NULL,
     Role NVARCHAR(20) NOT NULL CONSTRAINT CK_Users_Role CHECK (Role IN ('Admin', 'Sales Manager', 'Sales Rep')),
-    ManagerId INT NOT NULL CONSTRAINT FK_ManagerId FOREIGN KEY REFERENCES  dbo.Users(Id),
+    ManagerId INT NULL CONSTRAINT FK_ManagerId FOREIGN KEY REFERENCES  dbo.Users(Id),
 
 
 
@@ -119,7 +119,7 @@ CREATE TABLE dbo.Leads (
     ContactId INT NOT NULL CONSTRAINT FK_Leads_Contacts FOREIGN KEY REFERENCES dbo.Contacts(Id),
     CompanyId INT NULL CONSTRAINT FK_Leads_Companies FOREIGN KEY REFERENCES dbo.Companies(Id),
     LeadStageId INT NOT NULL CONSTRAINT FK_Leads_LeadStages FOREIGN KEY REFERENCES dbo.LeadStages(Id), -- What is current stage of lead
-    AssignedToUserId INT NOT NULL CONSTRAINT FK_Leads_Users FOREIGN KEY REFERENCES dbo.Users(Id),
+    AssignedToUserId INT NULL CONSTRAINT FK_Leads_Users FOREIGN KEY REFERENCES dbo.Users(Id),
     Source NVARCHAR(50) NOT NULL,
     EstimatedValue DECIMAL(18,2) NULL,
     CurrentScore DECIMAL(5,2) NULL,

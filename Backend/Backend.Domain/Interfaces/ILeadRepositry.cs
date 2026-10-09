@@ -17,7 +17,7 @@ namespace Backend.Domain.Interfaces
 
         // Write operations
         Task<Lead> AddAsync(Lead lead);
-        Task UpdateAsync(Lead lead);
+        Task<Lead> UpdateAsync(Lead lead);
         Task<bool> DeleteAsync(int id);
     }
 }

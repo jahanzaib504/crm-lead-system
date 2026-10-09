@@ -3,7 +3,7 @@ const { default: axios } = require("axios");
 const api = axios.create({
   baseURL: "https://localhost:5544",
   headers: {
-    "Content-Type": process.env.VITE_API,
+    "Content-Type": "application/json",
   },
 });
 

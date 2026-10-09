@@ -13,7 +13,7 @@ public interface INoteRepository
 
     // Write operations
     Task<Note> AddAsync(Note note);
-    Task UpdateAsync(Note note);
+    Task<Note> UpdateAsync(Note note);
     Task<bool> DeleteAsync(int id);
 }
 

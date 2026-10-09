@@ -1,4 +1,5 @@
-﻿using Backend.Domain.Models;
+﻿using Backend.Domain.Interfaces;
+using Backend.Domain.Models;
 using Backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Backend.Infrastructure.Repositories
 {
-    public class LeadStageRepository
+    public class LeadStageRepository: ILeadStageRepositry
     {
         private readonly AppDbContext _context;
 
@@ -37,10 +38,11 @@ namespace Backend.Infrastructure.Repositories
         }
 
         // Update an existing entity
-        public async Task UpdateAsync(LeadStage leadStage)
+        public async Task<LeadStage> UpdateAsync(LeadStage leadStage)
         {
             _context.LeadStages.Update(leadStage);
             await _context.SaveChangesAsync();
+            return leadStage;
         }
 
         // Delete an entity by ID

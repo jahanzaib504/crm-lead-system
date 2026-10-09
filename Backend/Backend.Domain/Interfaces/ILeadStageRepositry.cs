@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Backend.Domain.Interfaces
 {
-    internal interface ILeadStageRepositry
+    public interface ILeadStageRepositry
     {
     }
 }

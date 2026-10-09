@@ -1,9 +1,18 @@
 ###
-POST http://localhost:5220/auth/register
+POST http://localhost:5220/auth/login
 Content-type: application/json
 {
   "fullName": "Jahanzaib",
   "email": "jahanzaibawan2008@gmail.com",
   "password": "iuauhsfu",
-  "role": "Admin"
+  "role": "Sales Rep"
+}
+
+### 
+POST http://localhost:5220/leads
+Content-type: application/json
+{
+  "title": "Hello World",
+  "Source": "Website",
+  "contactId": 1
 }

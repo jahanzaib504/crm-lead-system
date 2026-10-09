@@ -3,7 +3,7 @@
 using Backend.Application.Dtos;
 using Backend.Application.Services;
 using Microsoft.AspNetCore.Mvc;
-
+using Backend.Application.Dtos.User;
 namespace Backend.Api.Controllers;
 
 [ApiController] 
