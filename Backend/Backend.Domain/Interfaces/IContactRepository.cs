@@ -12,6 +12,7 @@ namespace Backend.Domain.Interfaces
         Task<IEnumerable<Contact>> GetAllAsync();
         Task<(IEnumerable<Contact> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize);
         Task<bool> ExistsAsync(int id);
+        Task<bool> ExistsByEmailAsync(string email);
 
         // Write operations
         Task<Contact> AddAsync(Contact contact);

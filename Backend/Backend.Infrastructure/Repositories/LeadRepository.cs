@@ -17,22 +17,15 @@ namespace Backend.Infrastructure.Repositories
         // Get single Lead by ID (returns Lead instead of LeadStage)
         public async Task<Lead?> GetByIdAsync(int id)
         {
-            return await _context.Leads
+            return await _context.Leads.Include(l => l.LeadStage)
                 .FirstOrDefaultAsync(l => l.Id == id);
         }
 
-        // Get single Lead by ID including related LeadStage and navigation properties
-        public async Task<Lead?> GetByIdWithDetailsAsync(int id)
-        {
-            return await _context.Leads
-                .Include(l => l.LeadStage)
-                .FirstOrDefaultAsync(l => l.Id == id);
-        }
 
         // Get all Leads (read-only optimized)
         public async Task<IEnumerable<Lead>> GetAllAsync()
         {
-            return await _context.Leads
+            return await _context.Leads.Include(_l => _l.LeadStage)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -46,6 +39,7 @@ namespace Backend.Infrastructure.Repositories
             var items = await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
+                .Include(l => l.LeadStage)
                 .ToListAsync();
 
             return (items, totalCount);
@@ -57,6 +51,7 @@ namespace Backend.Infrastructure.Repositories
             return await _context.Leads
                 .AsNoTracking()
                 .Where(l => l.LeadStageId == stageId)
+                .Include(_l => _l.LeadStage)
                 .ToListAsync();
         }
 

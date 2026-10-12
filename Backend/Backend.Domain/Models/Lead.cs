@@ -8,7 +8,7 @@ public partial class Lead
     public int Id { get; set; }
 
     public string Title { get; set; } = null!;
-
+    public string Query { get; set; } = null!;
     public int ContactId { get; set; }
 
     public int? CompanyId { get; set; }
@@ -16,7 +16,7 @@ public partial class Lead
     public int LeadStageId { get; set; }
 
     public int? AssignedToUserId { get; set; }
-
+    public int? ManagerId { get; set; }
     public string Source { get; set; } = null!;
 
     public decimal? EstimatedValue { get; set; }

@@ -68,6 +68,8 @@ builder.Services.AddProblemDetails();
 // Adding password hasher
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
+// Add http context
+builder.Services.AddHttpContextAccessor();
 
 // Add Infrastructure 
 builder.Services.AddInfrastructureServices();

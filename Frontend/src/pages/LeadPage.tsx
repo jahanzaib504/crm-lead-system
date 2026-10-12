@@ -7,6 +7,7 @@ interface LeadForm {
   phone: string;
   jobTitle: string;
   title: string;
+  query: string,
   source: string;
   estimatedValue: number | string;
 }
@@ -18,6 +19,7 @@ interface FormErrors {
   phone: string | null;
   jobTitle: string | null;
   title: string | null;
+  query: string | null;
   source: string | null;
   estimatedValue: string | null;
 }
@@ -33,6 +35,7 @@ export const LeadPage = () => {
     phone: "",
     jobTitle: "",
     title: "",
+    query: "",
     source: "",
     estimatedValue: 0.0,
   });
@@ -44,6 +47,7 @@ export const LeadPage = () => {
     phone: null,
     jobTitle: null,
     title: null,
+    query: null,
     source: null,
     estimatedValue: null,
   });
@@ -78,6 +82,7 @@ export const LeadPage = () => {
     const newErrors: Partial<FormErrors> = {};
     if (!lead.title.trim()) newErrors.title = "Lead title is required.";
     if (!lead.source.trim()) newErrors.source = "Please select a lead source.";
+    if(!lead.query.trim()) newErrors.query = "Please write down query";
     if (
       lead.estimatedValue === "" ||
       isNaN(Number(lead.estimatedValue)) ||
@@ -269,6 +274,27 @@ export const LeadPage = () => {
             />
             {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
           </div>
+
+
+          <div>
+            <label htmlFor="query" className="block text-sm font-medium text-gray-700 mb-1">
+              Query *
+            </label>
+            <input
+              type="text"
+              id="query"
+              value={lead.query}
+              onChange={handleChange}
+              className={`w-full px-3 py-2 border rounded-md outline-none text-sm ${
+                errors.query ? "border-red-500" : "border-gray-300 focus:border-blue-500"
+              }`}
+              placeholder="e.g., Enterprise Cloud Migration"
+              maxLength={1000}
+            />
+            <small className="text-zinc-500 font-semibold w-full">{lead.query?.length}/1000</small>
+            {errors.query && <p className="text-xs text-red-500 mt-1">{errors.query}</p>}
+          </div>
+
 
           <div>
             <label htmlFor="source" className="block text-sm font-medium text-gray-700 mb-1">

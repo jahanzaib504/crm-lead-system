@@ -11,6 +11,8 @@ public class CreateLeadDto
 
     [Required]
     public string Title { get; set; } = null!;
+    [Required]
+    public string Query { get; set; } = null!;
 
     [Required]
     public int ContactId { get; set; }
@@ -21,5 +23,5 @@ public class CreateLeadDto
 
     [Required]
     public decimal? EstimatedValue { get; set; }
-
+    
 }

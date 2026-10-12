@@ -1,4 +1,5 @@
-﻿using Backend.Application.Dtos.Lead;
+﻿using Backend.Application.Dtos.Common;
+using Backend.Application.Dtos.Lead;
 using Backend.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,21 +16,42 @@ public class LeadController : ControllerBase
     public LeadController(ILeadService leadService) {
         _leadService = leadService;
     }
-    
-    // For every new lead we must be create a contact
+
+    // For every new lead we must be create a contact 
+
+    [HttpPost("create")]
+    public async Task<bool> CreateLeadWithContact(CreateLeadWithContactDto dto)
+    {
+        await _leadService.RegisterWithContactAsync(dto);
+
+        return true;
+    }
 
     [HttpPost]
     [Authorize]
+    // Create a lead for existant contact
     public async Task<LeadResponseDto> CreateLead(CreateLeadDto leadDto) {
-        // Check if the company exists for this lead
+        // Check if the contact exists for this lead
         var res = await _leadService.RegisterAsync(leadDto);
         return res;
     }
-    // For unauthorize user contact must be created
-    //public async Task<> CreateLeadWithContact()
+    [HttpGet("{id}")]
+    [Authorize]
+    public async Task<LeadResponseDto?> GetLead(int id)
+    {
+        return await _leadService.GetByIdAsync(id);
+    }
+
+    [HttpGet]
+    [Authorize]
+    public async Task<(IEnumerable<LeadResponseDto>, int)> GetLeadPaged(int pageNumber, int pageSize) {
+        return await _leadService.GetPagedAsync(pageNumber, pageSize);
+    }
+
+    //[HttpGet("{id}")]
+    //[Authorize]
+    //public async Task<LeadResponseDto> GetLeadById(int Id)
     //{
-
+        
     //}
-    
-
 };

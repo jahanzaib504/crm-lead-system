@@ -1,4 +1,4 @@
-const { default: axios } = require("axios");
+import axios from "axios";
 
 const api = axios.create({
   baseURL: "https://localhost:5544",
@@ -24,4 +24,4 @@ api.interceptors.request.use(
   }
 );
 
-module.exports = api;
+export default api;

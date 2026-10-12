@@ -3,16 +3,32 @@ POST http://localhost:5220/auth/login
 Content-type: application/json
 {
   "fullName": "Jahanzaib",
-  "email": "jahanzaibawan2008@gmail.com",
-  "password": "iuauhsfu",
+  "email": "jahanzaibkhan@crm.com",
+  "password": "Password123",
   "role": "Sales Rep"
 }
 
 ### 
-POST http://localhost:5220/leads
+POST http://localhost:5220/leads/create
 Content-type: application/json
 {
   "title": "Hello World",
+  "FirstName": "Jahanzaib",
+  "LastName": "Awan",
+  "Email": "jahanzaib3f@gmail.com",
+  "JobTitle": "Technician",
+  "Phone": "0344212",
   "Source": "Website",
+  "Query": "I want to make car",
   "contactId": 1
 }
+
+###
+GET http://localhost:5220/leads/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3IiwiZW1haWwiOiJqYWhhbnphaWJraGFuQGNybS5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJTYWxlcyBSZXAiLCJqdGkiOiIwYWY5NmFmOS0wZDQ0LTRkNTMtYWYzNy01ZmE5NTM2YmU1MWEiLCJleHAiOjE3OTE4MDY0NzAsImlzcyI6Imh0dHBzOi8vY3JtLmNvbSIsImF1ZCI6Imh0dHBzOi8vY3JtLmNvbSJ9.rF1HEQ4VhlghndUqe-SOfnc5upf5Of5clAumwHc6wJ8
+
+
+### 
+POST http://localhost:5220/users/revoke-access/2
+Content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3IiwiZW1haWwiOiJqYWhhbnphaWJraGFuQGNybS5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJTYWxlcyBSZXAiLCJqdGkiOiIwYWY5NmFmOS0wZDQ0LTRkNTMtYWYzNy01ZmE5NTM2YmU1MWEiLCJleHAiOjE3OTE4MDY0NzAsImlzcyI6Imh0dHBzOi8vY3JtLmNvbSIsImF1ZCI6Imh0dHBzOi8vY3JtLmNvbSJ9.rF1HEQ4VhlghndUqe-SOfnc5upf5Of5clAumwHc6wJ8

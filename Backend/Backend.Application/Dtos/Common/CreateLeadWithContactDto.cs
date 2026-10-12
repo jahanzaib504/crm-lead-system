@@ -23,7 +23,8 @@ public class CreateLeadWithContactDto
 
     [Required]
     public string JobTitle { get; set; } = null!;
-
+    [Required]
+    public string Query { get; set; } = null!;
 
     // Lead info also
     [Required]

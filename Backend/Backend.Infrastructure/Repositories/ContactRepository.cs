@@ -59,7 +59,11 @@ namespace Backend.Infrastructure.Repositories
             return await _context.Contacts
                 .AnyAsync(c => c.Id == id);
         }
-
+        public async Task<bool> ExistsByEmailAsync(string email)
+        {
+            return await _context.Contacts
+                .AnyAsync(c => c.Email == email);
+        }
         public async Task<Contact> AddAsync(Contact contact)
         {
             await _context.Contacts.AddAsync(contact);

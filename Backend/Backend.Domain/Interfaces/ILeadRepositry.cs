@@ -9,7 +9,7 @@ namespace Backend.Domain.Interfaces
     {
         // Read operations
         Task<Lead?> GetByIdAsync(int id);
-        Task<Lead?> GetByIdWithDetailsAsync(int id);
+ 
         Task<IEnumerable<Lead>> GetAllAsync();
         Task<(IEnumerable<Lead> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize);
         Task<IEnumerable<Lead>> GetByStageIdAsync(int stageId);

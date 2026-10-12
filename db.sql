@@ -116,10 +116,12 @@ CREATE UNIQUE NONCLUSTERED INDEX UX_LeadStages_Name ON dbo.LeadStages(Name) WHER
 CREATE TABLE dbo.Leads (
     Id INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_Leads PRIMARY KEY,
     Title NVARCHAR(200) NOT NULL,
+    Query NVARCHAR(1000) NOT NULL,
     ContactId INT NOT NULL CONSTRAINT FK_Leads_Contacts FOREIGN KEY REFERENCES dbo.Contacts(Id),
     CompanyId INT NULL CONSTRAINT FK_Leads_Companies FOREIGN KEY REFERENCES dbo.Companies(Id),
     LeadStageId INT NOT NULL CONSTRAINT FK_Leads_LeadStages FOREIGN KEY REFERENCES dbo.LeadStages(Id), -- What is current stage of lead
     AssignedToUserId INT NULL CONSTRAINT FK_Leads_Users FOREIGN KEY REFERENCES dbo.Users(Id),
+    ManagerId INT NULL CONSTRAINT FK_Leads_Manager FOREIGN KEY REFERENCES dbo.Users(Id),
     Source NVARCHAR(50) NOT NULL,
     EstimatedValue DECIMAL(18,2) NULL,
     CurrentScore DECIMAL(5,2) NULL,
@@ -269,18 +271,18 @@ VALUES
 (10, 'Chrisjen', 'Avasarala', 'cavasarala@horizonbio.example.com', '+1-555-0210', 'VP Strategic Alliances');
 
 -- Seed 5: Leads (10 Transaction Records)
-INSERT INTO dbo.Leads (Title, ContactId, CompanyId, LeadStageId, AssignedToUserId, Source, EstimatedValue, CurrentScore)
+INSERT INTO dbo.Leads (Title, Query, ContactId, CompanyId, LeadStageId, AssignedToUserId, Source, EstimatedValue, CurrentScore)
 VALUES 
-('Enterprise ERP License Upgrade', 1, 1, 4, 3, 'Website', 120000.00, 82.50),
-('Cloud Infrastructure Migration', 2, 2, 3, 3, 'Referral', 45000.00, 68.00),
-('Fleet Tracking System Integration', 3, 3, 2, 4, 'Cold Call', 250000.00, 45.00),
-('Core Banking API Security Audit', 4, 4, 4, 4, 'Trade Show', 95000.00, 88.00),
-('Solar Farm IoT Monitoring Software', 5, 5, 1, 5, 'Website', 35000.00, 20.00),
-('Hospital Inventory Mgmt Platform', 6, 6, 3, 5, 'Inbound Email', 78000.00, 62.00),
-('E-commerce Checkout Optimization', 7, 7, 5, 3, 'Referral', 55000.00, 95.00),
-('Digital Ad Campaign Automation', 8, 8, 6, 4, 'Cold Call', 18000.00, 0.00),
-('Robotic Assembly Line Telemetry', 9, 9, 2, 5, 'Trade Show', 140000.00, 52.00),
-('Clinical Trial Data Storage Suite', 10, 10, 3, 3, 'Website', 110000.00, 74.00);
+('Enterprise ERP License Upgrade', 'We want to upgrade our Erp system',1, 1, 4, 3, 'Website', 120000.00, 82.50),
+('Cloud Infrastructure Migration', 'We are migrating from on premesis to cloud',2, 2, 3, 3, 'Referral', 45000.00, 68.00),
+('Fleet Tracking System Integration', 'Our company is integrating fleet system',3, 3, 2, 4, 'Cold Call', 250000.00, 45.00),
+('Core Banking API Security Audit', 'Core Banking API Security Audit',4, 4, 4, 4, 'Trade Show', 95000.00, 88.00),
+('Solar Farm IoT Monitoring Software', 'We want to Solar Farm IoT Monitoring Software',5, 5, 1, 5, 'Website', 35000.00, 20.00),
+('Hospital Inventory Mgmt Platform', 'Hospital Inventory Mgmt Platform',6, 6, 3, 5, 'Inbound Email', 78000.00, 62.00),
+('E-commerce Checkout Optimization', 'E-commerce Checkout Optimization',7, 7, 5, 3, 'Referral', 55000.00, 95.00),
+('Digital Ad Campaign Automation', 'E-commerce Checkout Optimization',8, 8, 6, 4, 'Cold Call', 18000.00, 0.00),
+('Robotic Assembly Line Telemetry', 'Robotic Assembly Line Telemetry',9, 9, 2, 5, 'Trade Show', 140000.00, 52.00),
+('Clinical Trial Data Storage Suite', 'Clinical Trial Data Storage Suite',10, 10, 3, 3, 'Website', 110000.00, 74.00);
 
 -- Seed 6: Activities (10 Transaction Records)
 INSERT INTO dbo.Activities (LeadId, ActivityType, Subject, Summary, ActivityDate, LoggedByUserId)
