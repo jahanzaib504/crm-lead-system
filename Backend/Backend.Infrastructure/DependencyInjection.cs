@@ -15,6 +15,7 @@ namespace Backend.Infrastructure
             services.AddScoped<ILeadRepository,  LeadRepository>();
             services.AddScoped<ILeadStageRepositry, LeadStageRepository>();
             services.AddScoped<IContactRepository, ContactRepository>();
+            services.AddScoped<INoteRepository, NoteRepository>();
             return services;
         }
 

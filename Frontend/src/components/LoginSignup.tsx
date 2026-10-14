@@ -1,4 +1,8 @@
 import { useState } from "react";
+import { login, register } from "../services/authService";
+import toast from "react-hot-toast";
+import { Link, useNavigate } from "react-router";
+import { useUser } from "../store/userStore";
 
 interface LoginSignupProps {
     isLoginPage?: boolean;
@@ -11,10 +15,14 @@ const LoginSignup = ({ isLoginPage = false }: LoginSignupProps) => {
         email: null,
         password: null
     });
+    const [isSubmitting, setSubmitting] = useState(false);
+
+    const setUserStore = useUser((state)=>state.setUser);
+    const navigate = useNavigate();
 
     const roles = ["Sales Rep", "Sales Manager"];
-    
 
+  
 
     const HandleError = (field: "fullName" | "email" | "password", message: string) => {
         setErrors((prev) => ({ ...prev, [field]: message }));
@@ -37,7 +45,7 @@ const LoginSignup = ({ isLoginPage = false }: LoginSignupProps) => {
         }
 
         // 2. Email Validation
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\$/;
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         if (!emailRegex.test(user.email)) {
             HandleError("email", "Please enter a valid email address");
             isValid = false;
@@ -52,18 +60,46 @@ const LoginSignup = ({ isLoginPage = false }: LoginSignupProps) => {
         return isValid;
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (!validate()) return;
 
+        const { email, password, fullName, role } = user;
+        setSubmitting(true);
         if (isLoginPage) {
-            console.log("Logging in with:", { email: user.email, password: user.password, role: user.role });
+            console.log("Logging in with:", { email: user.email, password: user.password });
+            try {
+                const { token, refreshToken, user, expiresAt } = await login({ email, password });
+                localStorage.setItem("token", token);
+                localStorage.setItem("refreshToken", refreshToken);
+                localStorage.setItem("expiresAt", expiresAt);
+                toast.success("User logged in successfully");
+                
+                // set user
 
+                setUserStore(user);
+                // Navigate to dashboard
+                navigate("/dashboard");
+            } catch (e: any) {
+                toast.error(e.response?.data?.title);
+            }
         } else {
             console.log("Signing up with:", user);
+            try {
+                const { token, refreshToken, user, expiresAt } = await register({ email, fullName, password, role });
+                localStorage.setItem("token", token);
+                localStorage.setItem("refreshToken", refreshToken);
+                localStorage.setItem("expiresAt", expiresAt);
 
+                toast.success("User registered successfully");
+                setUserStore(user);
+                navigate("/dashboard");
+            } catch (e: any) {
+                toast.error(e.response?.data?.title);
+            }
         }
+        setSubmitting(false);
     };
 
     const handleRoleClick = (role: string) => {
@@ -143,7 +179,7 @@ const LoginSignup = ({ isLoginPage = false }: LoginSignupProps) => {
                 </div>
 
 
-                    
+
                 {!isLoginPage && <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
                         Select Role:
@@ -156,8 +192,8 @@ const LoginSignup = ({ isLoginPage = false }: LoginSignupProps) => {
                                 type="button"
                                 onClick={handleRoleClick(crole)}
                                 className={`rounded-lg border px-4 py-2 transition ${crole === user.role
-                                        ? "border-red-500 bg-red-50 font-semibold text-red-500"
-                                        : "border-gray-300 text-gray-700 hover:border-gray-400"
+                                    ? "border-red-500 bg-red-50 font-semibold text-red-500"
+                                    : "border-gray-300 text-gray-700 hover:border-gray-400"
                                     }`}
                             >
                                 {crole}
@@ -169,10 +205,15 @@ const LoginSignup = ({ isLoginPage = false }: LoginSignupProps) => {
                 <button
                     type="submit"
                     className="w-full rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2"
+                    disabled={isSubmitting}
                 >
                     {isLoginPage ? "Login" : "Sign Up"}
+                    {isSubmitting? "...": ""}
                 </button>
+
             </form>
+            {isLoginPage && <div className="text-sm text-red-500 text-center mt-2">Dont have an account? <Link to="/register" className="underline">Register</Link></div>}
+            {!isLoginPage && <div className="text-sm text-red-500 text-center mt-2">Already have an account? <Link to="/login" className="underline">Login</Link></div>}
         </div>
     );
 };

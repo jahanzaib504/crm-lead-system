@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { createLeadWithContact } from "../services/leadService";
+import toast from "react-hot-toast";
 
 interface LeadForm {
   firstName: string;
@@ -24,7 +26,7 @@ interface FormErrors {
   estimatedValue: string | null;
 }
 
-export const LeadPage = () => {
+export const CreateLeadPage = () => {
   const [step, setStep] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -82,7 +84,7 @@ export const LeadPage = () => {
     const newErrors: Partial<FormErrors> = {};
     if (!lead.title.trim()) newErrors.title = "Lead title is required.";
     if (!lead.source.trim()) newErrors.source = "Please select a lead source.";
-    if(!lead.query.trim()) newErrors.query = "Please write down query";
+    if (!lead.query.trim()) newErrors.query = "Please write down query";
     if (
       lead.estimatedValue === "" ||
       isNaN(Number(lead.estimatedValue)) ||
@@ -112,34 +114,22 @@ export const LeadPage = () => {
 
     setIsSubmitting(true);
     try {
-    
-      const payload = {
-        contact: {
-          firstName: lead.firstName,
-          lastName: lead.lastName,
-          email: lead.email,
-          phone: lead.phone || null,
-          jobTitle: lead.jobTitle || null,
-        },
-        lead: {
-          title: lead.title,
-          source: lead.source,
-          estimatedValue: Number(lead.estimatedValue),
-        },
-      };
-
-      const response = await fetch("/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) throw new Error("Failed to create lead");
-
-      alert("Lead created successfully!");
-    } catch (err) {
-      console.error(err);
-      alert("Error submitting lead. Please try again.");
+      await createLeadWithContact(lead);
+      toast.success("Lead created successfully");
+      setStep(0);
+      setLead({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        jobTitle: "",
+        title: "",
+        query: "",
+        source: "",
+        estimatedValue: 0.0
+      })
+    } catch (e: any) {
+        toast.error(e.response.data.title);
     } finally {
       setIsSubmitting(false);
     }
@@ -170,9 +160,8 @@ export const LeadPage = () => {
                 id="firstName"
                 value={lead.firstName}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md outline-none text-sm ${
-                  errors.firstName ? "border-red-500" : "border-gray-300 focus:border-blue-500"
-                }`}
+                className={`w-full px-3 py-2 border rounded-md outline-none text-sm ${errors.firstName ? "border-red-500" : "border-gray-300 focus:border-blue-500"
+                  }`}
                 placeholder="John"
               />
               {errors.firstName && <p className="text-xs text-red-500 mt-1">{errors.firstName}</p>}
@@ -187,9 +176,8 @@ export const LeadPage = () => {
                 id="lastName"
                 value={lead.lastName}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md outline-none text-sm ${
-                  errors.lastName ? "border-red-500" : "border-gray-300 focus:border-blue-500"
-                }`}
+                className={`w-full px-3 py-2 border rounded-md outline-none text-sm ${errors.lastName ? "border-red-500" : "border-gray-300 focus:border-blue-500"
+                  }`}
                 placeholder="Doe"
               />
               {errors.lastName && <p className="text-xs text-red-500 mt-1">{errors.lastName}</p>}
@@ -205,9 +193,8 @@ export const LeadPage = () => {
               id="email"
               value={lead.email}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md outline-none text-sm ${
-                errors.email ? "border-red-500" : "border-gray-300 focus:border-blue-500"
-              }`}
+              className={`w-full px-3 py-2 border rounded-md outline-none text-sm ${errors.email ? "border-red-500" : "border-gray-300 focus:border-blue-500"
+                }`}
               placeholder="john.doe@example.com"
             />
             {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
@@ -267,9 +254,8 @@ export const LeadPage = () => {
               id="title"
               value={lead.title}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md outline-none text-sm ${
-                errors.title ? "border-red-500" : "border-gray-300 focus:border-blue-500"
-              }`}
+              className={`w-full px-3 py-2 border rounded-md outline-none text-sm ${errors.title ? "border-red-500" : "border-gray-300 focus:border-blue-500"
+                }`}
               placeholder="e.g., Enterprise Cloud Migration"
             />
             {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
@@ -285,9 +271,8 @@ export const LeadPage = () => {
               id="query"
               value={lead.query}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md outline-none text-sm ${
-                errors.query ? "border-red-500" : "border-gray-300 focus:border-blue-500"
-              }`}
+              className={`w-full px-3 py-2 border rounded-md outline-none text-sm ${errors.query ? "border-red-500" : "border-gray-300 focus:border-blue-500"
+                }`}
               placeholder="e.g., Enterprise Cloud Migration"
               maxLength={1000}
             />
@@ -304,9 +289,8 @@ export const LeadPage = () => {
               id="source"
               value={lead.source}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md outline-none text-sm ${
-                errors.source ? "border-red-500" : "border-gray-300 focus:border-blue-500"
-              }`}
+              className={`w-full px-3 py-2 border rounded-md outline-none text-sm ${errors.source ? "border-red-500" : "border-gray-300 focus:border-blue-500"
+                }`}
             >
               <option value="">-- Select Source --</option>
               <option value="Website">Website</option>
@@ -328,9 +312,8 @@ export const LeadPage = () => {
               step="0.01"
               value={lead.estimatedValue}
               onChange={handleChange}
-              className={`w-full px-3 py-2 border rounded-md outline-none text-sm ${
-                errors.estimatedValue ? "border-red-500" : "border-gray-300 focus:border-blue-500"
-              }`}
+              className={`w-full px-3 py-2 border rounded-md outline-none text-sm ${errors.estimatedValue ? "border-red-500" : "border-gray-300 focus:border-blue-500"
+                }`}
               placeholder="0.00"
             />
             {errors.estimatedValue && (

@@ -11,7 +11,6 @@ public class UserResponseDto
     public string Email { get; set; } = null!;
     public string Role { get; set; } = null!;
     public int? ManagerId { get; set; }
-    public string? ManagerName { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public string CreatedBy { get; set; } = null!;

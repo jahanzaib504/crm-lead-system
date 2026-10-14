@@ -19,9 +19,24 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
+//Configuring cors service
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 // Add db context
 var connectionString = builder.Configuration.GetSection("ConnectionStrings")["DefaultConnection"];
@@ -82,7 +97,15 @@ builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
+// Configure middleware
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
+
+app.UseCors("AllowReactApp");
 // Enable
 app.UseAuthentication();
 app.UseAuthorization();

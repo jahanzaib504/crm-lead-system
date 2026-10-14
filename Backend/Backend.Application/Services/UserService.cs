@@ -1,5 +1,9 @@
-﻿using Backend.Application.Exceptions;
+﻿using Backend.Application.Dtos.User;
+using Backend.Application.Exceptions;
 using Backend.Domain.Interfaces;
+using Mapster;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 
@@ -9,6 +13,8 @@ public interface IUserService
 {
     Task<bool> GrantAccessToUser(int id);
     Task<bool> RevokeAccess(int id);
+    Task<UserResponseDto> GetMe();
+    //Task<IEnumerable<UserResponseDto>> GetAllUsers();
 }
 
 public class UserService : IUserService
@@ -74,4 +80,15 @@ public class UserService : IUserService
         await _userRepo.UpdateAsync(user);
         return true;
     }
+    public async Task<UserResponseDto> GetMe()
+    {
+        int? userId = _userManager.GetCurrentUserId();
+   
+        var user = await _userRepo.GetByIdAsync(userId.Value);
+        return user.Adapt<UserResponseDto>();
+    }
+    //public async Task<IEnumerable<UserResponseDto>> GetAllUsers()
+    //{
+    //    await _userRepo.GetByEmailAsync()
+    //}
 }

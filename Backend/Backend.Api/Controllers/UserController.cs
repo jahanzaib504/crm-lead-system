@@ -1,4 +1,5 @@
-﻿using Backend.Application.Services;
+﻿using Backend.Application.Dtos.User;
+using Backend.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,5 +25,11 @@ public class UserController
     public async Task<bool> RevokeAccess(int id)
     {
         return await _userService.RevokeAccess(id);
+    }
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<UserResponseDto> GetMe()
+    {
+        return await _userService.GetMe();
     }
 }

@@ -18,7 +18,7 @@ public class AuthService
         _tokenService = tokenService;
         _passwordHasher = passwordHasher;
     }
-    public async Task<UserResponseDto> RegisterUserAsync(RegisterUserDto userData)
+    public async Task<AuthResponseDto> RegisterUserAsync(RegisterUserDto userData)
     {
         User? user = await _userRepo.GetByEmailAsync(userData.Email);
         bool userExists = user != null;
@@ -48,8 +48,11 @@ public class AuthService
         await _userRepo.CreateAsync(userToBeStored);
 
         // Skipping email verification
-        var accessToken = _tokenService.CreateToken(userToBeStored);
-        return userToBeStored.Adapt<UserResponseDto>();
+        var token = _tokenService.CreateToken(userToBeStored);
+
+        var tokenResponse = new AuthResponseDto { Token = token, User = userToBeStored.Adapt<UserResponseDto>() };
+
+        return tokenResponse;
 
     }
 
@@ -65,7 +68,7 @@ public class AuthService
             // Assign a authorization token
         var token = _tokenService.CreateToken(user);
 
-        var tokenResponse = new AuthResponseDto { Token = token };
+        var tokenResponse = new AuthResponseDto { Token = token, User = user.Adapt<UserResponseDto>() };
 
         return tokenResponse;
 
