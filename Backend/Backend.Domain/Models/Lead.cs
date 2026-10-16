@@ -8,7 +8,9 @@ public partial class Lead
     public int Id { get; set; }
 
     public string Title { get; set; } = null!;
+
     public string Query { get; set; } = null!;
+
     public int ContactId { get; set; }
 
     public int? CompanyId { get; set; }
@@ -16,7 +18,9 @@ public partial class Lead
     public int LeadStageId { get; set; }
 
     public int? AssignedToUserId { get; set; }
+
     public int? ManagerId { get; set; }
+
     public string Source { get; set; } = null!;
 
     public decimal? EstimatedValue { get; set; }
@@ -48,6 +52,8 @@ public partial class Lead
     public virtual ICollection<LeadEvaluation> LeadEvaluations { get; set; } = new List<LeadEvaluation>();
 
     public virtual LeadStage LeadStage { get; set; } = null!;
+
+    public virtual User? Manager { get; set; }
 
     public virtual ICollection<Note> Notes { get; set; } = new List<Note>();
 }

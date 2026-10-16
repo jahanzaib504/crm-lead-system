@@ -2,7 +2,7 @@ import type { Contact } from "./Contact";
 import type { LeadStage } from "./LeadStage";
 import type { User } from "./User";
 
-export interface Lead{
+export interface Lead {
     id: number | null,
     title: string | null,
     query: string | null,
@@ -13,10 +13,17 @@ export interface Lead{
     currentScore: number,
     estimatedValue: number | 0,
 
-    
+
     User: User | null,
     leadStage: LeadStage
     contact: Contact | null,
 
-    
+    isActive: boolean,
+
+    createdAt: string | null,
+    createdBy: string | null,
+    updatedAt: string | null,
+    updatedBy: string | null,
+    isDeleted: boolean | null
+
 }

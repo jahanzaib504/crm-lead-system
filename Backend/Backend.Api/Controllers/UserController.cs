@@ -1,5 +1,6 @@
 ﻿using Backend.Application.Dtos.User;
 using Backend.Application.Services;
+using Backend.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,13 +16,13 @@ public class UserController
         _userService = userService;
     }
     [HttpPost("grant-access/{id}")]
-    [Authorize(Roles = "Sales Manager, Admin")]
+    [Authorize(Roles = "Admin")]
     public async Task<bool> GrantAccessToUser(int id)
     {
         return await _userService.GrantAccessToUser(id);
     }
     [HttpPost("revoke-access/{id}")]
-    [Authorize(Roles = "Sales Manager, Admin")]
+    [Authorize(Roles = "Admin")]
     public async Task<bool> RevokeAccess(int id)
     {
         return await _userService.RevokeAccess(id);
@@ -31,5 +32,11 @@ public class UserController
     public async Task<UserResponseDto> GetMe()
     {
         return await _userService.GetMe();
+    }
+    [HttpGet]
+    [Authorize(Roles="Admin, Sales Manager")]
+    public async Task<IEnumerable<UserResponseDto>> GetAllUsers() // Retreives all users working under this person
+    {
+        return await _userService.GetAllUsers();
     }
 }

@@ -13,7 +13,7 @@ public interface ILeadService
 {
     Task<LeadResponseDto?> GetByIdAsync(int id);
     Task<IEnumerable<LeadResponseDto>> GetAllAsync();
-    Task<(IEnumerable<LeadResponseDto> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize);
+    Task<PagedResponseDto<LeadResponseDto>> GetPagedAsync(int pageNumber, int pageSize);
     Task<IEnumerable<LeadResponseDto>> GetByStageIdAsync(int stageId);
     Task<LeadResponseDto> RegisterAsync(CreateLeadDto dto);
     Task<LeadResponseDto> RegisterWithContactAsync(CreateLeadWithContactDto dto);
@@ -37,11 +37,14 @@ public class LeadService : ILeadService
     }
 
     // Helper method to check access permission for a lead
-    private bool IsUserAuthorizedForLead(Lead lead, int? currentUserId)
+    private bool IsUserAuthorizedForLead(Lead lead)
     {
-        return lead.AssignedToUserId == currentUserId ||
-               lead.ManagerId == currentUserId ||
-               (lead.ManagerId == null && lead.AssignedToUserId == null);
+        int? currentUserId = _userManager.GetCurrentUserId();
+        string? currentUserRole = _userManager.GetCurrentUserRole();
+
+        return lead.AssignedToUserId == currentUserId || // If lead is assigned to current user
+               lead.ManagerId == currentUserId || // If current user is manager of this lead
+               (lead.ManagerId == null && lead.AssignedToUserId == null && currentUserRole is "Admin" or "Sales Manager"); // If lead is open so only admin and sales manager can view it
     }
 
     // Get single lead by ID
@@ -55,7 +58,7 @@ public class LeadService : ILeadService
 
         var userId = _userManager.GetCurrentUserId();
 
-        if (!IsUserAuthorizedForLead(lead, userId))
+        if (!IsUserAuthorizedForLead(lead))
         {
             throw new UnauthorizedException("User is not allowed to access");
         }
@@ -70,13 +73,13 @@ public class LeadService : ILeadService
         var leads = await _leadRepository.GetAllAsync();
 
         // Filter leads based on authorization criteria
-        var authorizedLeads = leads.Where(lead => IsUserAuthorizedForLead(lead, userId));
+        var authorizedLeads = leads.Where(lead => IsUserAuthorizedForLead(lead));
 
         return authorizedLeads.Adapt<LeadResponseDto[]>();
     }
 
     // Get paged list of leads (filtered by user authorization)
-    public async Task<(IEnumerable<LeadResponseDto> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize)
+    public async Task<PagedResponseDto<LeadResponseDto>> GetPagedAsync(int pageNumber, int pageSize)
     {
         var userId = _userManager.GetCurrentUserId();
 
@@ -84,7 +87,7 @@ public class LeadService : ILeadService
         var leads = await _leadRepository.GetAllAsync();
 
         // Filter authorized leads first
-        var authorizedLeads = leads.Where(lead => IsUserAuthorizedForLead(lead, userId)).ToList();
+        var authorizedLeads = leads.Where(lead => IsUserAuthorizedForLead(lead)).ToList();
 
         int totalCount = authorizedLeads.Count;
 
@@ -94,8 +97,8 @@ public class LeadService : ILeadService
             .Take(pageSize);
 
         var dtos = pagedItems.Adapt<LeadResponseDto[]>();
-
-        return (dtos, totalCount);
+        
+        return new PagedResponseDto<LeadResponseDto> { Items=dtos, TotalCount=totalCount};
     }
 
     // Get leads filtered by stage (filtered by user authorization)
@@ -105,7 +108,7 @@ public class LeadService : ILeadService
         var leads = await _leadRepository.GetByStageIdAsync(stageId);
 
         // Filter stage leads based on authorization criteria
-        var authorizedLeads = leads.Where(lead => IsUserAuthorizedForLead(lead, userId));
+        var authorizedLeads = leads.Where(lead => IsUserAuthorizedForLead(lead));
 
         return authorizedLeads.Adapt<LeadResponseDto[]>();
     }
@@ -156,7 +159,7 @@ public class LeadService : ILeadService
         }
 
         var userId = _userManager.GetCurrentUserId();
-        if (!IsUserAuthorizedForLead(existingLead, userId))
+        if (!IsUserAuthorizedForLead(existingLead))
         {
             throw new UnauthorizedAccessException("User is not allowed to edit this lead");
         }
@@ -177,7 +180,7 @@ public class LeadService : ILeadService
         }
 
         var userId = _userManager.GetCurrentUserId();
-        if (!IsUserAuthorizedForLead(existingLead, userId))
+        if (!IsUserAuthorizedForLead(existingLead))
         {
             throw new UnauthorizedAccessException("User is not allowed to delete this lead");
         }

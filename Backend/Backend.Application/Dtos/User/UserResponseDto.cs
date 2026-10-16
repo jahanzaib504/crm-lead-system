@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace Backend.Application.Dtos.User;
-
+public class RoleDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = null!;
+}
 public class UserResponseDto
 {
     public int Id { get; set; }
     public string FullName { get; set; } = null!;
     public string Email { get; set; } = null!;
-    public string Role { get; set; } = null!;
+    public int RoleId { get; set; }
+    public RoleDto Role { get; set; } = null!;
     public int? ManagerId { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }

@@ -17,26 +17,28 @@ namespace Backend.Infrastructure.Repositories
 
         public async Task<User?> GetByIdAsync(int id)
         {
-            return await _context.Users.SingleOrDefaultAsync(u=>u.Id == id);
+            return await _context.Users.Include(u=>u.Role).SingleOrDefaultAsync(u=>u.Id == id);
         }
 
         public async Task<User?> GetByEmailAsync(string email)
         {
-            return await _context.Users.SingleOrDefaultAsync(u=>u.Email==email);
+            return await _context.Users.Include(u => u.Role).SingleOrDefaultAsync(u=>u.Email==email);
         }
 
         public async Task<User> CreateAsync(User user)
         {
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
-            return user;
+
+            return await _context.Users.Include(u => u.Role).SingleAsync(u => u.Id == user.Id);
         }
 
         public async Task<User> UpdateAsync(User user)
         {
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
-            return user;
+            
+            return await _context.Users.Include(u=>u.Role).SingleAsync(u=>u.Id==user.Id);
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -50,6 +52,10 @@ namespace Backend.Infrastructure.Repositories
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             return true;
+        }
+        public async Task<IEnumerable<User>> GetAllAsync()
+        {
+            return await _context.Users.Include(u => u.Role).ToListAsync();
         }
     }
 }

@@ -2,26 +2,35 @@
 POST http://localhost:5220/auth/login
 Content-type: application/json
 {
-  "fullName": "mazhar",
-  "email": "mazhar@crm.com",
+  "fullName": "imad",
+  "email": "imad@crm.com",
   "password": "Password123",
-  "role": "Sales Manager"
+  "roleId": 2
 }
 
 ### 
 POST http://localhost:5220/leads/create
 Content-type: application/json
 {
-  "title": "Hello World",
-  "FirstName": "Jahanzaib",
+  "title": "Tesla Modification",
+  "FirstName": "Niml",
   "LastName": "Awan",
-  "Email": "jahanzaib3773@gmail.com",
-  "JobTitle": "Technician",
-  "Phone": "0344212",
-  "Source": "Website",
-  "Query": "I want to make car"
+  "Email": "niml@gmail.com",
+  "JobTitle": "Ceo",
+  "Phone": "03442101179",
+  "Source": "Linkedin",
+  "Query": "We are modifying our tesla from legacy platoform to modern."
   
 }
+
+###
+GET http://localhost:5220/leads/1002
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDA0IiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoiaW1hZEBjcm0uY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiU2FsZXMgTWFuYWdlciIsImp0aSI6ImUxODE3ZWQ5LTlmNzItNGQwYy04NTQ3LWIyZGQyYTliYjllOCIsImV4cCI6MTc5MjE1MDgwOSwiaXNzIjoiaHR0cHM6Ly9jcm0uY29tIiwiYXVkIjoiaHR0cHM6Ly9jcm0uY29tIn0.7O2Ee_NaWmWQIwCaLVIiXaCe9gjQKalFqpGXZXgBmKQ
+
+### Getting all leads
+GET http://localhost:5220/notes?leadId=10&pageNumber=1&pageSize=2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDA0IiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoiaW1hZEBjcm0uY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiU2FsZXMgTWFuYWdlciIsImp0aSI6IjJkMjMzMjY3LTZhM2ItNDI3Yy05Y2FlLTg3OTUxODQ0OWUyZSIsImV4cCI6MTc5MjEzMzU3OSwiaXNzIjoiaHR0cHM6Ly9jcm0uY29tIiwiYXVkIjoiaHR0cHM6Ly9jcm0uY29tIn0.kmE4rsgZZCxjQko_LLppFlmiGr4m7k36D2NsjZHipUE
+
 
 ###
 GET http://localhost:5220/users/me
@@ -32,3 +41,29 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4IiwiZW1ha
 POST http://localhost:5220/users/revoke-access/3
 Content-type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4IiwiZW1haWwiOiJtYXpoYXJAY3JtLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlNhbGVzIE1hbmFnZXIiLCJqdGkiOiI4ZGFiMmQxZC03Nzk1LTRhMGEtOTU2MC0yNzA1YTQ2M2QzZmUiLCJleHAiOjE3OTE4MDgxMzksImlzcyI6Imh0dHBzOi8vY3JtLmNvbSIsImF1ZCI6Imh0dHBzOi8vY3JtLmNvbSJ9.-3pZkGOBkYmX2mcl6Hzf3i313110zwpjdrCoyqiDUYc
+
+###
+POST http://localhost:5220/notes
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4IiwiZW1haWwiOiJtYXpoYXJAY3JtLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlNhbGVzIE1hbmFnZXIiLCJqdGkiOiI5N2Q0NGJkYy00Mjc1LTRjMTMtYWQ4NC1hYmM3N2ZkYzVjNTIiLCJleHAiOjE3OTIwNDM2MzUsImlzcyI6Imh0dHBzOi8vY3JtLmNvbSIsImF1ZCI6Imh0dHBzOi8vY3JtLmNvbSJ9.6WGjZtLXoKIO_jB0X7VqbmY6-p2HeOeqwgOX1UqSf9c
+Content-type: application/json
+{
+  "leadId": 1,
+  "content": "Hello world"
+}
+
+###
+GET http://localhost:5220/notes/5
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4IiwiZW1haWwiOiJtYXpoYXJAY3JtLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlNhbGVzIE1hbmFnZXIiLCJqdGkiOiI5N2Q0NGJkYy00Mjc1LTRjMTMtYWQ4NC1hYmM3N2ZkYzVjNTIiLCJleHAiOjE3OTIwNDM2MzUsImlzcyI6Imh0dHBzOi8vY3JtLmNvbSIsImF1ZCI6Imh0dHBzOi8vY3JtLmNvbSJ9.6WGjZtLXoKIO_jB0X7VqbmY6-p2HeOeqwgOX1UqSf9c
+
+###
+POST http://localhost:5220/notes
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4IiwiZW1haWwiOiJtYXpoYXJAY3JtLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlNhbGVzIE1hbmFnZXIiLCJqdGkiOiI5N2Q0NGJkYy00Mjc1LTRjMTMtYWQ4NC1hYmM3N2ZkYzVjNTIiLCJleHAiOjE3OTIwNDM2MzUsImlzcyI6Imh0dHBzOi8vY3JtLmNvbSIsImF1ZCI6Imh0dHBzOi8vY3JtLmNvbSJ9.6WGjZtLXoKIO_jB0X7VqbmY6-p2HeOeqwgOX1UqSf9c
+Content-type: application/json
+{
+  "leadId": 21,
+  "content": "Successfully created second note"
+}
+
+###
+GET http://localhost:5220/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDA0IiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoiaW1hZEBjcm0uY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiU2FsZXMgTWFuYWdlciIsImp0aSI6IjA5MmRjOTY2LTBlOGMtNDRmZS05ODNiLTFhOWIwZmE2OGVjNCIsImV4cCI6MTc5MjE1MTYxOCwiaXNzIjoiaHR0cHM6Ly9jcm0uY29tIiwiYXVkIjoiaHR0cHM6Ly9jcm0uY29tIn0.zT0Jin-fgrnf_zIwqGqE9mCLQfSAb2VAdr_e1DUfUFk

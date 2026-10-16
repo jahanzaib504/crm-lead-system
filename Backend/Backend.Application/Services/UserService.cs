@@ -14,7 +14,7 @@ public interface IUserService
     Task<bool> GrantAccessToUser(int id);
     Task<bool> RevokeAccess(int id);
     Task<UserResponseDto> GetMe();
-    //Task<IEnumerable<UserResponseDto>> GetAllUsers();
+    Task<IEnumerable<UserResponseDto>> GetAllUsers();
 }
 
 public class UserService : IUserService
@@ -87,8 +87,15 @@ public class UserService : IUserService
         var user = await _userRepo.GetByIdAsync(userId.Value);
         return user.Adapt<UserResponseDto>();
     }
-    //public async Task<IEnumerable<UserResponseDto>> GetAllUsers()
-    //{
-    //    await _userRepo.GetByEmailAsync()
-    //}
+    public async Task<IEnumerable<UserResponseDto>> GetAllUsers()
+    {
+        var users = await _userRepo.GetAllAsync();
+        var currentUserRole = _userManager.GetCurrentUserRole();
+        if (currentUserRole == "Admin")
+            return users.Adapt<UserResponseDto[]>();
+        
+        var userSalesReps = users.Where(u=>u.ManagerId == _userManager.GetCurrentUserId());
+        return userSalesReps.Adapt<UserResponseDto[]>();
+        
+    }
 }

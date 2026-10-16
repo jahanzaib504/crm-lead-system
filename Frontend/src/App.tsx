@@ -9,10 +9,13 @@ import { getMe } from './services/userService'
 import { useUser } from './store/userStore'
 import { IndexPage } from './pages/IndexPage'
 import { Dashboard } from './pages/Dashboard'
+import { SideBar } from './components/sidebar'
+import { LeadsPage } from './pages/LeadsPage'
+import { SingleLeadPage } from './pages/SingleLeadPage'
+
 
 function App() {
   const setUserStore = useUser((state) => state.setUser);
-  const loading = useUser((state)=> state.loading);
   const setLoading = useUser((state)=> state.setLoading);
 
   useEffect(() => {
@@ -43,10 +46,11 @@ function App() {
       <Route path='/' element={<IndexPage />}/>
 
       <Route path='/create-lead' element={<CreateLeadPage />}></Route>
-      
+      <Route path='/s' element={<SideBar/>}/>
       <Route element={<AuthRoute />}>
         <Route path='/dashboard' element={<Dashboard/>} />
-
+        <Route path='/leads' element={<LeadsPage/>} />
+        <Route path='/leads/:id' element={<SingleLeadPage/>} />
       </Route>
     </Routes>
   )

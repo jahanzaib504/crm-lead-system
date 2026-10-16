@@ -1,4 +1,5 @@
 ﻿
+using Backend.Application.Dtos.Common;
 using Backend.Application.Dtos.Note;
 using Backend.Application.Exceptions;
 using Backend.Domain.Interfaces;
@@ -14,6 +15,7 @@ public interface INoteService
 {
     public Task<NoteResponseDto> GetNote(int noteId);
     public Task<NoteResponseDto> CreateNote(CreateNoteDto dto);
+    public Task<PagedResponseDto<NoteResponseDto>> GetPagedNotes(NotePagedRequestDto dto);
 }
 public class NoteService: INoteService
 {
@@ -37,6 +39,29 @@ public class NoteService: INoteService
             throw new UnauthorizedException("User not allowed to access this");
 
         return note.Adapt<NoteResponseDto>();
+    }
+    public async Task<PagedResponseDto<NoteResponseDto>> GetPagedNotes(NotePagedRequestDto dto)
+    {
+        // Check if the lead belongs to user
+        var lead = await _leadRepositry.GetByIdAsync(dto.LeadId);
+        var currentUserId = _userManager.GetCurrentUserId();
+        if (lead == null)
+            throw new NotFoundException("Lead not found");
+
+        if (currentUserId != lead.AssignedToUserId)
+            throw new UnauthorizedException("User not allowed to access this lead");
+        
+
+        var notes = await _noteRepository.GetAllWithLeadsAsync();
+        
+
+        var authorizedNotes = notes.Where(n => n.LeadId == lead.Id && n.Lead.AssignedToUserId == currentUserId || n.Lead.ManagerId == currentUserId);
+
+        var pagedNotes = authorizedNotes.Skip(dto.PageNumber - 1).Take(dto.PageSize);
+        
+        var totalCount = authorizedNotes.Count();
+
+        return new PagedResponseDto<NoteResponseDto> { Items = pagedNotes.Adapt<NoteResponseDto[]>(),  TotalCount = totalCount};
     }
     public async Task<NoteResponseDto> CreateNote(CreateNoteDto dto)
     {

@@ -13,7 +13,7 @@ public partial class User
 
     public string PasswordHash { get; set; } = null!;
 
-    public string Role { get; set; } = null!;
+    public int RoleId { get; set; }
 
     public int? ManagerId { get; set; }
 
@@ -37,9 +37,13 @@ public partial class User
 
     public virtual ICollection<User> InverseManager { get; set; } = new List<User>();
 
+    public virtual ICollection<Lead> LeadAssignedToUsers { get; set; } = new List<Lead>();
+
     public virtual ICollection<LeadEvaluation> LeadEvaluations { get; set; } = new List<LeadEvaluation>();
 
-    public virtual ICollection<Lead> Leads { get; set; } = new List<Lead>();
+    public virtual ICollection<Lead> LeadManagers { get; set; } = new List<Lead>();
 
     public virtual User? Manager { get; set; }
+
+    public virtual Role Role { get; set; } = null!;
 }

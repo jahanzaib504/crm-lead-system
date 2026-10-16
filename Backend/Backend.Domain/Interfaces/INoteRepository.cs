@@ -9,6 +9,7 @@ public interface INoteRepository
     Task<Note?> GetByIdAsync(int id);
     Task<Note?> GetByIdWithLeadAsync(int id);
     Task<IEnumerable<Note>> GetAllAsync();
+    Task<IEnumerable<Note>> GetAllWithLeadsAsync();
     Task<(IEnumerable<Note> Items, int TotalCount)> GetPagedAsync(int pageNumber, int pageSize);
     Task<bool> ExistsAsync(int id);
 

@@ -25,19 +25,23 @@ IF OBJECT_ID('dbo.LeadStages', 'U') IS NOT NULL DROP TABLE dbo.LeadStages;
 IF OBJECT_ID('dbo.Contacts', 'U') IS NOT NULL DROP TABLE dbo.Contacts;
 IF OBJECT_ID('dbo.Companies', 'U') IS NOT NULL DROP TABLE dbo.Companies;
 IF OBJECT_ID('dbo.Users', 'U') IS NOT NULL DROP TABLE dbo.Users;
+IF OBJECT_ID('dbo.Roles', 'U') IS NOT NULL DROP TABLE dbo.Roles;
 GO
 
 -- ============================================================================
 -- 2. CREATE TABLES
 -- ============================================================================
-
+CREATE TABLE dbo.Roles(
+    Id INT NOT NULL CONSTRAINT PK_Roles PRIMARY KEY,
+    Name NVARCHAR(100) NOT NULL
+)
 -- Table 1: Users
 CREATE TABLE dbo.Users (
     Id INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_Users PRIMARY KEY,
     FullName NVARCHAR(100) NOT NULL,
     Email NVARCHAR(150) NOT NULL,
     PasswordHash NVARCHAR(MAX) NOT NULL,
-    Role NVARCHAR(20) NOT NULL CONSTRAINT CK_Users_Role CHECK (Role IN ('Admin', 'Sales Manager', 'Sales Rep')),
+    RoleId INT NOT NULL default 1 CONSTRAINT FK_RoleId FOREIGN KEY REFERENCES dbo.Roles(Id),
     ManagerId INT NULL CONSTRAINT FK_ManagerId FOREIGN KEY REFERENCES  dbo.Users(Id),
 
 
@@ -222,15 +226,22 @@ GO
 -- ============================================================================
 -- 3. SEED DATA GENERATION
 -- ============================================================================
+INSERT INTO dbo.Roles(
+Id,
+Name
+) Values
+(1, 'Admin'),
+(2, 'Sales Manager'),
+(3, 'Sales Rep');
 
 -- Seed 1: Users (Hashes represent default password "Password123!")
-INSERT INTO dbo.Users (FullName, Email, PasswordHash, Role)
+INSERT INTO dbo.Users (FullName, Email, PasswordHash, RoleId)
 VALUES 
-('System Admin', 'admin@crm.com', 'AQAAAAEAACcQAAAAEHx82m8X+samplehashforadmin...', 'Admin'),
-('Sarah Connor', 'sarah.m@crm.com', 'AQAAAAEAACcQAAAAEHx82m8X+samplehashformgr...', 'Sales Manager'),
-('John Doe', 'john.rep@crm.com', 'AQAAAAEAACcQAAAAEHx82m8X+samplehashforrep1...', 'Sales Rep'),
-('Alice Smith', 'alice.rep@crm.com', 'AQAAAAEAACcQAAAAEHx82m8X+samplehashforrep2...', 'Sales Rep'),
-('Robert Bruce', 'robert.rep@crm.com', 'AQAAAAEAACcQAAAAEHx82m8X+samplehashforrep3...', 'Sales Rep');
+('System Admin', 'admin@crm.com', 'AQAAAAEAACcQAAAAEHx82m8X+samplehashforadmin...', 1),
+('Sarah Connor', 'sarah.m@crm.com', 'AQAAAAEAACcQAAAAEHx82m8X+samplehashformgr...', 2),
+('John Doe', 'john.rep@crm.com', 'AQAAAAEAACcQAAAAEHx82m8X+samplehashforrep1...', 3),
+('Alice Smith', 'alice.rep@crm.com', 'AQAAAAEAACcQAAAAEHx82m8X+samplehashforrep2...', 3),
+('Robert Bruce', 'robert.rep@crm.com', 'AQAAAAEAACcQAAAAEHx82m8X+samplehashforrep3...', 3);
 
 -- Seed 2: LeadStages (6 pipeline steps)
 INSERT INTO dbo.LeadStages (Name, DisplayOrder, ConversionWeight)

@@ -1,5 +1,6 @@
 import api from "../api";
 import type { Lead } from "../types/Lead";
+import type { PaginationResponse } from "../types/PaginationResponse";
 
 interface LeadForm{
   firstName: string;
@@ -22,12 +23,12 @@ const createLead = async () =>{
     return;
 }
 
-const getLead = async (id: number) =>{
-    return;
+const getLead = async (id: number): Promise<Lead> =>{
+    return (await api.get(`/leads/${id}`)).data;
 }
 
-const getLeadsPaged = async (pageNumber: number, pageSize=10): Promise<Lead[]> => {
-    return (await api.get<Lead[]>("/leads", {params: {pageNumber, pageSize}})).data;
+const getLeadsPaged = async (pageNumber: number, pageSize=10): Promise<PaginationResponse<Lead>> => {
+    return (await api.get("/leads", {params: {pageNumber, pageSize}})).data;
 }
 
 

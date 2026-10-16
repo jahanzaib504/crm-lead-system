@@ -15,6 +15,7 @@ namespace Backend.Application
             services.AddScoped<ILeadService, LeadService>();
             services.AddScoped<IUserManager, UserManager>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<INoteService, NoteService>();
             return services;
         }            
     }

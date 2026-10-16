@@ -37,7 +37,7 @@ public class AuthService
 
 
 
-        User userToBeStored = new User { FullName = userData.FullName, Email = userData.Email, Role = userData.Role };
+        User userToBeStored = new User { FullName = userData.FullName, Email = userData.Email, RoleId = userData.RoleId };
 
 
         // Hash password

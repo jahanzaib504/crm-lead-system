@@ -7,6 +7,9 @@ namespace Backend.Infrastructure.Data;
 
 public partial class AppDbContext : DbContext
 {
+    public AppDbContext()
+    {
+    }
 
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
@@ -31,8 +34,13 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Note> Notes { get; set; }
 
+    public virtual DbSet<Role> Roles { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;Persist Security Info=False;Pooling=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Application Name='SQL Server Management Studio';Command Timeout=0;Initial Catalog=CRM_LeadSystem");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -156,13 +164,13 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CurrentScore).HasColumnType("decimal(5, 2)");
             entity.Property(e => e.EstimatedValue).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.IsActive).HasDefaultValue(true, "DF_Leads_IsActive");
+            entity.Property(e => e.Query).HasMaxLength(1000);
             entity.Property(e => e.Source).HasMaxLength(50);
             entity.Property(e => e.Title).HasMaxLength(200);
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
 
-            entity.HasOne(d => d.AssignedToUser).WithMany(p => p.Leads)
+            entity.HasOne(d => d.AssignedToUser).WithMany(p => p.LeadAssignedToUsers)
                 .HasForeignKey(d => d.AssignedToUserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Leads_Users");
 
             entity.HasOne(d => d.Company).WithMany(p => p.Leads)
@@ -178,6 +186,10 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.LeadStageId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Leads_LeadStages");
+
+            entity.HasOne(d => d.Manager).WithMany(p => p.LeadManagers)
+                .HasForeignKey(d => d.ManagerId)
+                .HasConstraintName("FK_Leads_Manager");
         });
 
         modelBuilder.Entity<LeadEvaluation>(entity =>
@@ -230,6 +242,12 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK_Notes_Leads");
         });
 
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Name).HasMaxLength(100);
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasIndex(e => e.Email, "UX_Users_Email")
@@ -242,13 +260,17 @@ public partial class AppDbContext : DbContext
                 .HasDefaultValue("SystemSeed");
             entity.Property(e => e.Email).HasMaxLength(150);
             entity.Property(e => e.FullName).HasMaxLength(100);
-            entity.Property(e => e.ManagerId).HasColumnName("managerId");
-            entity.Property(e => e.Role).HasMaxLength(20);
+            entity.Property(e => e.RoleId).HasDefaultValue(1);
             entity.Property(e => e.UpdatedBy).HasMaxLength(100);
 
             entity.HasOne(d => d.Manager).WithMany(p => p.InverseManager)
                 .HasForeignKey(d => d.ManagerId)
-                .HasConstraintName("FK_MANAGER_ID");
+                .HasConstraintName("FK_ManagerId");
+
+            entity.HasOne(d => d.Role).WithMany(p => p.Users)
+                .HasForeignKey(d => d.RoleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_RoleId");
         });
 
         OnModelCreatingPartial(modelBuilder);

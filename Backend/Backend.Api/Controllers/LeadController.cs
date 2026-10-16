@@ -44,7 +44,8 @@ public class LeadController : ControllerBase
 
     [HttpGet]
     [Authorize]
-    public async Task<(IEnumerable<LeadResponseDto>, int)> GetLeadPaged(int pageNumber, int pageSize) {
+    public async Task<PagedResponseDto<LeadResponseDto>> GetLeadPaged(int pageNumber, int pageSize) {
+   
         return await _leadService.GetPagedAsync(pageNumber, pageSize);
     }
 

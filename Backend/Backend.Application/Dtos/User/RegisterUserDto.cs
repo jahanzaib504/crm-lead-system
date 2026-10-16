@@ -16,8 +16,7 @@ public class RegisterUserDto
     [Required, MinLength(8), MaxLength(100)]
     public string Password { get; set; } = null!;
 
-    [Required, AllowedValues(["Sales Rep", "Sales Manager"])]
-    public string Role { get; set; } = null!;
-
+    [Required, AllowedValues([1, 2, 3])]
+    public int RoleId { get; set; }
 
 }
