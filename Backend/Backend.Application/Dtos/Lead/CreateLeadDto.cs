@@ -1,4 +1,4 @@
-﻿using Backend.Domain.Models;
+using Backend.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -17,11 +17,11 @@ public class CreateLeadDto
     [Required]
     public int ContactId { get; set; }
 
+    public int? CompanyId { get; set; }
 
     [Required]
     public string Source { get; set; } = null!;
 
     [Required]
     public decimal? EstimatedValue { get; set; }
-    
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -13,10 +13,8 @@ public class RegisterUserDto
     [Required, EmailAddress, MaxLength(150)]
     public string Email { get; set; } = null!;
 
-    [Required, MinLength(8), MaxLength(100)]
+    [Required, MinLength(6), MaxLength(100)]
     public string Password { get; set; } = null!;
 
-    [Required, AllowedValues([1, 2, 3])]
-    public int RoleId { get; set; }
-
+    public int? RoleId { get; set; }
 }

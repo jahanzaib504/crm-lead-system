@@ -1,42 +1,92 @@
-﻿using Backend.Application.Dtos.User;
+using Backend.Application.Dtos.User;
 using Backend.Application.Services;
-using Backend.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Backend.Api.Controllers;
 
 [ApiController]
 [Route("users")]
-public class UserController
+public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
+
     public UserController(IUserService userService)
     {
         _userService = userService;
     }
+
+    [HttpPost("approve/{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<bool>> ApproveUser(int id, [FromBody] ApproveUserDto dto)
+    {
+        var result = await _userService.ApproveUser(id, dto);
+        return Ok(result);
+    }
+
+    [HttpPut("{id}/access")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<bool>> UpdateUserAccess(int id, [FromBody] ApproveUserDto dto)
+    {
+        var result = await _userService.UpdateUserAccess(id, dto);
+        return Ok(result);
+    }
+
     [HttpPost("grant-access/{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<bool> GrantAccessToUser(int id)
+    public async Task<ActionResult<bool>> GrantAccessToUser(int id)
     {
-        return await _userService.GrantAccessToUser(id);
+        var result = await _userService.GrantAccessToUser(id);
+        return Ok(result);
     }
+
     [HttpPost("revoke-access/{id}")]
-    [Authorize(Roles = "Admin")]
-    public async Task<bool> RevokeAccess(int id)
+    [Authorize(Roles = "Admin,Sales Manager")]
+    public async Task<ActionResult<bool>> RevokeAccess(int id)
     {
-        return await _userService.RevokeAccess(id);
+        var result = await _userService.RevokeAccess(id);
+        return Ok(result);
     }
+
     [HttpGet("me")]
     [Authorize]
-    public async Task<UserResponseDto> GetMe()
+    public async Task<ActionResult<UserResponseDto>> GetMe()
     {
-        return await _userService.GetMe();
+        var result = await _userService.GetMe();
+        return Ok(result);
     }
+
     [HttpGet]
-    [Authorize(Roles="Admin, Sales Manager")]
-    public async Task<IEnumerable<UserResponseDto>> GetAllUsers() // Retreives all users working under this person
+    [Authorize(Roles = "Admin,Sales Manager")]
+    public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetAllUsers()
     {
-        return await _userService.GetAllUsers();
+        var result = await _userService.GetAllUsers();
+        return Ok(result);
+    }
+
+    [HttpGet("pending")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetPendingUsers()
+    {
+        var result = await _userService.GetPendingUsers();
+        return Ok(result);
+    }
+
+    [HttpGet("managers")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetManagers()
+    {
+        var result = await _userService.GetManagers();
+        return Ok(result);
+    }
+
+    [HttpGet("reps")]
+    [Authorize(Roles = "Admin,Sales Manager")]
+    public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetSalesReps()
+    {
+        var result = await _userService.GetSalesReps();
+        return Ok(result);
     }
 }

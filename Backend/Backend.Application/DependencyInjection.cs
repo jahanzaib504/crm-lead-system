@@ -1,4 +1,4 @@
-﻿using Backend.Application.Services;
+using Backend.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -16,6 +16,9 @@ namespace Backend.Application
             services.AddScoped<IUserManager, UserManager>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<INoteService, NoteService>();
+            services.AddScoped<IFollowUpService, FollowUpService>();
+            services.AddScoped<IActivityService, ActivityService>();
+            services.AddScoped<IAnalyticsService, AnalyticsService>();
             return services;
         }            
     }

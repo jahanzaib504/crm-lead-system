@@ -1,4 +1,3 @@
-﻿
 using Backend.Application.Dtos.Common;
 using Backend.Application.Dtos.Note;
 using Backend.Application.Exceptions;
@@ -7,76 +6,109 @@ using Backend.Domain.Models;
 using Mapster;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Backend.Application.Services;
 
 public interface INoteService
 {
-    public Task<NoteResponseDto> GetNote(int noteId);
-    public Task<NoteResponseDto> CreateNote(CreateNoteDto dto);
-    public Task<PagedResponseDto<NoteResponseDto>> GetPagedNotes(NotePagedRequestDto dto);
+    Task<NoteResponseDto> GetNote(int noteId);
+    Task<NoteResponseDto> CreateNote(CreateNoteDto dto);
+    Task<IEnumerable<NoteResponseDto>> GetNotesForLead(int leadId);
+    Task<PagedResponseDto<NoteResponseDto>> GetPagedNotes(NotePagedRequestDto dto);
 }
-public class NoteService: INoteService
+
+public class NoteService : INoteService
 {
     private readonly INoteRepository _noteRepository;
     private readonly IUserManager _userManager;
-    private readonly ILeadRepository _leadRepositry;
+    private readonly ILeadRepository _leadRepository;
+
     public NoteService(INoteRepository noteRepository, IUserManager userManager, ILeadRepository leadRepository)
     {
-        _noteRepository = noteRepository;
-        _userManager= userManager;
-        _leadRepositry = leadRepository;
+        _noteRepository = noteRepository ?? throw new ArgumentNullException(nameof(noteRepository));
+        _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        _leadRepository = leadRepository ?? throw new ArgumentNullException(nameof(leadRepository));
     }
-    public async Task<NoteResponseDto?> GetNote(int noteId)
+
+    private bool IsAuthorizedForLead(Lead lead)
+    {
+        var role = _userManager.GetCurrentUserRole();
+        var userId = _userManager.GetCurrentUserId();
+
+        if (role == "Admin") return true;
+        if (role == "Sales Manager") return lead.ManagerId == userId || (lead.ManagerId == null && lead.AssignedToUserId == null);
+        return lead.AssignedToUserId == userId;
+    }
+
+    public async Task<NoteResponseDto> GetNote(int noteId)
     {
         var note = await _noteRepository.GetByIdWithLeadAsync(noteId);
         if (note == null)
-            throw new NotFoundException("Note not found");
+            throw new NotFoundException("Note not found.");
 
-        int? userId = _userManager.GetCurrentUserId();
-        if(note.Lead.AssignedToUserId != userId)
-            throw new UnauthorizedException("User not allowed to access this");
+        if (!IsAuthorizedForLead(note.Lead))
+            throw new UnauthorizedException("User not authorized to access this note.");
 
         return note.Adapt<NoteResponseDto>();
     }
+
+    public async Task<IEnumerable<NoteResponseDto>> GetNotesForLead(int leadId)
+    {
+        var lead = await _leadRepository.GetByIdAsync(leadId);
+        if (lead == null)
+            throw new NotFoundException("Lead not found.");
+
+        if (!IsAuthorizedForLead(lead))
+            throw new UnauthorizedException("User not authorized to access notes for this lead.");
+
+        var allNotes = await _noteRepository.GetAllAsync();
+        var leadNotes = allNotes
+            .Where(n => n.LeadId == leadId)
+            .OrderByDescending(n => n.CreatedAt)
+            .Select(n => n.Adapt<NoteResponseDto>());
+
+        return leadNotes;
+    }
+
     public async Task<PagedResponseDto<NoteResponseDto>> GetPagedNotes(NotePagedRequestDto dto)
     {
-        // Check if the lead belongs to user
-        var lead = await _leadRepositry.GetByIdAsync(dto.LeadId);
-        var currentUserId = _userManager.GetCurrentUserId();
+        var lead = await _leadRepository.GetByIdAsync(dto.LeadId);
         if (lead == null)
-            throw new NotFoundException("Lead not found");
+            throw new NotFoundException("Lead not found.");
 
-        if (currentUserId != lead.AssignedToUserId)
-            throw new UnauthorizedException("User not allowed to access this lead");
-        
+        if (!IsAuthorizedForLead(lead))
+            throw new UnauthorizedException("User not authorized to access notes for this lead.");
 
-        var notes = await _noteRepository.GetAllWithLeadsAsync();
-        
+        var allNotes = await _noteRepository.GetAllAsync();
+        var filtered = allNotes.Where(n => n.LeadId == dto.LeadId).OrderByDescending(n => n.CreatedAt).ToList();
 
-        var authorizedNotes = notes.Where(n => n.LeadId == lead.Id && n.Lead.AssignedToUserId == currentUserId || n.Lead.ManagerId == currentUserId);
+        var totalCount = filtered.Count;
+        var paged = filtered.Skip((dto.PageNumber - 1) * dto.PageSize).Take(dto.PageSize).Select(n => n.Adapt<NoteResponseDto>()).ToArray();
 
-        var pagedNotes = authorizedNotes.Skip(dto.PageNumber - 1).Take(dto.PageSize);
-        
-        var totalCount = authorizedNotes.Count();
-
-        return new PagedResponseDto<NoteResponseDto> { Items = pagedNotes.Adapt<NoteResponseDto[]>(),  TotalCount = totalCount};
+        return new PagedResponseDto<NoteResponseDto> { Items = paged, TotalCount = totalCount };
     }
+
     public async Task<NoteResponseDto> CreateNote(CreateNoteDto dto)
     {
-        // Create note with lead
-        // check if the lead belongs to user
-        var lead = await _leadRepositry.GetByIdAsync(dto.LeadId);
+        var lead = await _leadRepository.GetByIdAsync(dto.LeadId);
         if (lead == null)
-            throw new NotFoundException("Lead not found");
+            throw new NotFoundException("Lead not found.");
 
-        var userId = _userManager.GetCurrentUserId();
-        if (userId != lead.AssignedToUserId)
-            throw new UnauthorizedException("User not allowed to access this lead");
+        if (!IsAuthorizedForLead(lead))
+            throw new UnauthorizedException("User not authorized to create notes for this lead.");
 
-        var note = await _noteRepository.AddAsync(dto.Adapt<Note>());
+        var note = new Note
+        {
+            LeadId = dto.LeadId,
+            Content = dto.Content,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = _userManager.GetCurrentUserName() ?? _userManager.GetCurrentUserEmail() ?? "User",
+            IsActive = true
+        };
 
-        return note.Adapt<NoteResponseDto>();
+        var created = await _noteRepository.AddAsync(note);
+        return created.Adapt<NoteResponseDto>();
     }
 }

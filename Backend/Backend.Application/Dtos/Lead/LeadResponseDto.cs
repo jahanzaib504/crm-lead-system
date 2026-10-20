@@ -1,4 +1,4 @@
-﻿using Backend.Application.Dtos.LeadStage;
+using Backend.Application.Dtos.LeadStage;
 using Backend.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -26,6 +26,28 @@ public class LeadResponseDto
     public string Source { get; set; } = null!;
 
     public decimal? EstimatedValue { get; set; }
+
+    public decimal? CurrentScore { get; set; }
+
+    public int? ManagerId { get; set; }
+
+    public string? ManagerName { get; set; }
+
+    public string? AssignedToUserName { get; set; }
+
+    public string? ContactName { get; set; }
+
+    public string? ContactEmail { get; set; }
+
+    public string? ContactPhone { get; set; }
+
+    public string? ContactJobTitle { get; set; }
+
+    public string? CompanyName { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
 
     public LeadStageDto? LeadStage { get; set; } = null!;
 }

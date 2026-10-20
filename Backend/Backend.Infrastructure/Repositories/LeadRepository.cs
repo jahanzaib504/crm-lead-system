@@ -1,4 +1,4 @@
-﻿using Backend.Domain.Models;
+using Backend.Domain.Models;
 using Backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Backend.Domain.Interfaces;
@@ -14,18 +14,27 @@ namespace Backend.Infrastructure.Repositories
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        // Get single Lead by ID (returns Lead instead of LeadStage)
+        // Get single Lead by ID
         public async Task<Lead?> GetByIdAsync(int id)
         {
-            return await _context.Leads.Include(l => l.LeadStage)
+            return await _context.Leads
+                .Include(l => l.LeadStage)
+                .Include(l => l.Contact)
+                .Include(l => l.Company)
+                .Include(l => l.AssignedToUser)
+                .Include(l => l.Manager)
                 .FirstOrDefaultAsync(l => l.Id == id);
         }
-
 
         // Get all Leads (read-only optimized)
         public async Task<IEnumerable<Lead>> GetAllAsync()
         {
-            return await _context.Leads.Include(_l => _l.LeadStage)
+            return await _context.Leads
+                .Include(l => l.LeadStage)
+                .Include(l => l.Contact)
+                .Include(l => l.Company)
+                .Include(l => l.AssignedToUser)
+                .Include(l => l.Manager)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -40,6 +49,10 @@ namespace Backend.Infrastructure.Repositories
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Include(l => l.LeadStage)
+                .Include(l => l.Contact)
+                .Include(l => l.Company)
+                .Include(l => l.AssignedToUser)
+                .Include(l => l.Manager)
                 .ToListAsync();
 
             return (items, totalCount);

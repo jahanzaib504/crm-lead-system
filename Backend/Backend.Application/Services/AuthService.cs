@@ -1,4 +1,4 @@
-﻿using Backend.Application.Dtos.User;
+using Backend.Application.Dtos.User;
 using Backend.Application.Exceptions;
 using Backend.Domain.Interfaces;
 using Backend.Domain.Models;
@@ -21,39 +21,38 @@ public class AuthService
     public async Task<AuthResponseDto> RegisterUserAsync(RegisterUserDto userData)
     {
         User? user = await _userRepo.GetByEmailAsync(userData.Email);
-        bool userExists = user != null;
-        // User exists but is not granted access
-
-        if (userExists && !user.IsActive)
+        if (user != null)
         {
-            throw new UnauthorizedException("User access is pending");
+            if (!user.IsActive)
+            {
+                throw new UnauthorizedException("An account with this email is already registered and pending administrator approval.");
+            }
+            throw new ConflictException("User with this email already exists");
         }
 
-        if (userExists)
+        int roleId = userData.RoleId ?? 3; // Default to Sales Rep (role 3)
+
+        User userToBeStored = new User
         {
-            throw new ConflictException("User already exists");
-        }
-
-
-
-
-        User userToBeStored = new User { FullName = userData.FullName, Email = userData.Email, RoleId = userData.RoleId };
-
-
-        // Hash password
+            FullName = userData.FullName,
+            Email = userData.Email,
+            RoleId = roleId,
+            IsActive = false,
+            CreatedAt = DateTime.UtcNow,
+            CreatedBy = "SelfRegistration"
+        };
 
         var hashedPassword = _passwordHasher.HashPassword(userToBeStored, userData.Password);
         userToBeStored.PasswordHash = hashedPassword;
 
-        await _userRepo.CreateAsync(userToBeStored);
+        var createdUser = await _userRepo.CreateAsync(userToBeStored);
 
-        // Skipping email verification
-        var token = _tokenService.CreateToken(userToBeStored);
-
-        var tokenResponse = new AuthResponseDto { Token = token, User = userToBeStored.Adapt<UserResponseDto>() };
-
-        return tokenResponse;
-
+        // Do not issue JWT token for inactive users; they must wait for admin approval
+        return new AuthResponseDto
+        {
+            Token = string.Empty,
+            User = createdUser.Adapt<UserResponseDto>()
+        };
     }
 
     public async Task<AuthResponseDto> LoginUserAsync(LoginUserDto userData)
@@ -65,16 +64,20 @@ public class AuthService
         if (user == null || !isPasswordMatch) 
             throw new NotFoundException("Incorrect email or password");
 
-            // Assign a authorization token
+        if (!user.IsActive)
+        {
+            throw new UnauthorizedException("Your account is pending administrator approval. Please wait for an administrator to activate your account.");
+        }
+
         var token = _tokenService.CreateToken(user);
 
-        var tokenResponse = new AuthResponseDto { Token = token, User = user.Adapt<UserResponseDto>() };
-
-        return tokenResponse;
-
+        return new AuthResponseDto
+        {
+            Token = token,
+            User = user.Adapt<UserResponseDto>()
+        };
     }
-
-    }
+}
 
 
 

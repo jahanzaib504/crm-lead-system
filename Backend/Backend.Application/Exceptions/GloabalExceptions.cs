@@ -1,4 +1,4 @@
-﻿
+
 
 namespace Backend.Application.Exceptions;
 
@@ -26,5 +26,10 @@ public class ConflictException : CustomException
 public class UnauthorizedException : CustomException
 {
     public UnauthorizedException(string message) : base(message, 401) { }
+}
+
+public class BadRequestException : CustomException
+{
+    public BadRequestException(string message) : base(message, 400) { }
 }
 

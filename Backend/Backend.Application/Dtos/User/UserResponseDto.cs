@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -16,6 +16,7 @@ public class UserResponseDto
     public int RoleId { get; set; }
     public RoleDto Role { get; set; } = null!;
     public int? ManagerId { get; set; }
+    public string? ManagerName { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public string CreatedBy { get; set; } = null!;

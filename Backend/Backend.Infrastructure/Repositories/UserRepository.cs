@@ -1,4 +1,4 @@
-﻿using Backend.Domain.Interfaces;
+using Backend.Domain.Interfaces;
 using Backend.Domain.Models;
 using Backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -17,12 +17,12 @@ namespace Backend.Infrastructure.Repositories
 
         public async Task<User?> GetByIdAsync(int id)
         {
-            return await _context.Users.Include(u=>u.Role).SingleOrDefaultAsync(u=>u.Id == id);
+            return await _context.Users.Include(u => u.Role).Include(u => u.Manager).SingleOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<User?> GetByEmailAsync(string email)
         {
-            return await _context.Users.Include(u => u.Role).SingleOrDefaultAsync(u=>u.Email==email);
+            return await _context.Users.Include(u => u.Role).Include(u => u.Manager).SingleOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task<User> CreateAsync(User user)
@@ -30,7 +30,7 @@ namespace Backend.Infrastructure.Repositories
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            return await _context.Users.Include(u => u.Role).SingleAsync(u => u.Id == user.Id);
+            return await _context.Users.Include(u => u.Role).Include(u => u.Manager).SingleAsync(u => u.Id == user.Id);
         }
 
         public async Task<User> UpdateAsync(User user)
@@ -38,7 +38,7 @@ namespace Backend.Infrastructure.Repositories
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
             
-            return await _context.Users.Include(u=>u.Role).SingleAsync(u=>u.Id==user.Id);
+            return await _context.Users.Include(u => u.Role).Include(u => u.Manager).SingleAsync(u => u.Id == user.Id);
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -55,7 +55,7 @@ namespace Backend.Infrastructure.Repositories
         }
         public async Task<IEnumerable<User>> GetAllAsync()
         {
-            return await _context.Users.Include(u => u.Role).ToListAsync();
+            return await _context.Users.Include(u => u.Role).Include(u => u.Manager).ToListAsync();
         }
     }
 }
