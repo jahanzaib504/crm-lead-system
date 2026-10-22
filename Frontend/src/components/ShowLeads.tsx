@@ -1,19 +1,20 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { Lead } from "../types/Lead";
 import { getLeadsPaged } from "../services/leadService";
 
 export const ShowLeads = () => {
   const [page, setPage] = useState<number>(1);
 
   const {
-    data: leads,
+    data,
     isPending,
     isError,
-  } = useQuery<Lead[]>({
-    queryKey: ["leads", page],
+  } = useQuery({
+    queryKey: ["leads-show", page],
     queryFn: () => getLeadsPaged(page),
   });
+
+  const leads = data?.items;
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -38,8 +39,8 @@ export const ShowLeads = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {leads.map((lead) => (
             <div
-              key={lead.id ?? Math.random()}
-              className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between space-y-4"
+              key={lead.id}
+              className="bg-white rounded-lg border border-gray-200 p-5 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-4"
             >
               <div className="space-y-2">
                 <div className="flex justify-between items-start gap-2">
@@ -74,17 +75,9 @@ export const ShowLeads = () => {
                 <div className="flex justify-between">
                   <span>Score:</span>
                   <span className="font-medium text-gray-700">
-                    {lead.currentScore}
+                    {lead.currentScore ?? 0}
                   </span>
                 </div>
-                {false && lead.User && (
-                  <div className="flex justify-between">
-                    <span>Assigned To:</span>
-                    <span className="font-medium text-gray-700">
-                      {lead?.User?.fullName || lead?.User?.email || "User"}
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
           ))}
