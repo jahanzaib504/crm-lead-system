@@ -11,6 +11,8 @@ import {
     Building2, 
     PlusCircle
 } from "lucide-react";
+import { usePagination } from "../hooks/usePagination";
+import type { Lead } from "../types/Lead";
 
 const STAGES = [
     { id: 0, name: "All Stages" },
@@ -36,8 +38,7 @@ interface LeadsPageProps {
 }
 
 export const LeadsPage = ({ openPoolOnly = false }: LeadsPageProps) => {
-    const [page, setPage] = useState(1);
-    const [pageSize] = useState(8);
+    
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedStage, setSelectedStage] = useState(0);
     const [poolFilter, setPoolFilter] = useState<boolean | undefined>(openPoolOnly ? true : undefined);
@@ -46,10 +47,10 @@ export const LeadsPage = ({ openPoolOnly = false }: LeadsPageProps) => {
     const roleName = currentUser?.role?.name;
     const queryClient = useQueryClient();
 
-    const { data, isPending, isError } = useQuery({
-        queryKey: ["leads", page, pageSize, searchTerm, selectedStage, poolFilter],
-        queryFn: () => getLeadsPaged(page, pageSize, searchTerm, selectedStage || undefined, poolFilter),
-    });
+    const {data, isPending, isError, page, pageSize, prevButton, nextButton} = usePagination<Lead>({
+        keys: ["leads", searchTerm, selectedStage, poolFilter], 
+        fn: ()=>getLeadsPaged(1, 8, searchTerm, selectedStage || undefined, poolFilter), page:1, pageSize:8
+    })
 
     const acquireMutation = useMutation({
         mutationFn: (leadId: number) => acquireLead(leadId),
@@ -105,7 +106,7 @@ export const LeadsPage = ({ openPoolOnly = false }: LeadsPageProps) => {
                             value={searchTerm}
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
-                                setPage(1);
+                                
                             }}
                             placeholder="Search by title, contact, company..."
                             className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500"
@@ -118,7 +119,7 @@ export const LeadsPage = ({ openPoolOnly = false }: LeadsPageProps) => {
                             value={selectedStage}
                             onChange={(e) => {
                                 setSelectedStage(Number(e.target.value));
-                                setPage(1);
+                               
                             }}
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-500 text-gray-700"
                         >
@@ -133,21 +134,21 @@ export const LeadsPage = ({ openPoolOnly = false }: LeadsPageProps) => {
                         <div className="flex items-center rounded-lg border border-gray-200 p-0.5 bg-slate-50 text-xs font-medium">
                             <button
                                 type="button"
-                                onClick={() => { setPoolFilter(undefined); setPage(1); }}
+                                onClick={() => { setPoolFilter(undefined);  }}
                                 className={`px-2.5 py-1.5 rounded-md transition ${poolFilter === undefined ? "bg-white text-blue-600 font-semibold shadow-xs" : "text-gray-500 hover:text-gray-800"}`}
                             >
                                 All
                             </button>
                             <button
                                 type="button"
-                                onClick={() => { setPoolFilter(false); setPage(1); }}
+                                onClick={() => { setPoolFilter(false);  }}
                                 className={`px-2.5 py-1.5 rounded-md transition ${poolFilter === false ? "bg-white text-blue-600 font-semibold shadow-xs" : "text-gray-500 hover:text-gray-800"}`}
                             >
                                 Assigned
                             </button>
                             <button
                                 type="button"
-                                onClick={() => { setPoolFilter(true); setPage(1); }}
+                                onClick={() => { setPoolFilter(true); }}
                                 className={`px-2.5 py-1.5 rounded-md transition ${poolFilter === true ? "bg-white text-blue-600 font-semibold shadow-xs" : "text-gray-500 hover:text-gray-800"}`}
                             >
                                 Open Pool
@@ -185,7 +186,7 @@ export const LeadsPage = ({ openPoolOnly = false }: LeadsPageProps) => {
             {!isPending && !isError && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {leads.length > 0 ? (
-                        leads.map((lead) => {
+                        leads.map((lead:any) => {
                             const isOpenLead = lead.managerId == null && lead.assignedToUserId == null;
                             const canClaim = isOpenLead && (roleName === "Sales Manager" || roleName === "Admin");
 
@@ -285,20 +286,18 @@ export const LeadsPage = ({ openPoolOnly = false }: LeadsPageProps) => {
                     </span>
 
                     <div className="flex gap-2">
-                        <button
-                            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                            disabled={page === 1 || isPending}
+                        <div
+                        
                             className="px-3 py-1.5 text-xs font-semibold border rounded-lg bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
                         >
-                            Previous
-                        </button>
-                        <button
-                            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-                            disabled={page >= totalPages || isPending}
+                            {prevButton}
+                        </div>
+                        <div
+                            
                             className="px-3 py-1.5 text-xs font-semibold border rounded-lg bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
                         >
-                            Next
-                        </button>
+                            {nextButton}
+                        </div>
                     </div>
                 </div>
             )}
