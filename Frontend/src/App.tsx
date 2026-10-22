@@ -14,6 +14,7 @@ import { SingleLeadPage } from './pages/SingleLeadPage';
 import { FollowUpsPage } from './pages/FollowUpsPage';
 import { AdminUsersManagementPage } from './pages/AdminUsersMangementPage';
 import { Toaster } from 'react-hot-toast';
+import { AuditLogsPage } from './pages/AuditLogsPage';
 
 function App() {
   const setUserStore = useUser((state) => state.setUser);
@@ -62,6 +63,7 @@ function App() {
             <Route path='/pool' element={<LeadsPage openPoolOnly={true} key="pool-leads"/>} />
             <Route path='/followups' element={<FollowUpsPage />} />
             <Route path='/admin/users' element={<AdminUsersManagementPage />} />
+            <Route path='/audit-logs' element={<AuditLogsPage />} />
           </Route>
         </Route>
       </Routes>

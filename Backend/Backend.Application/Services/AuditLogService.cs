@@ -22,7 +22,7 @@ public class AuditLogService: IAuditLogService
     {
         var logs = await _auditLogRepo.GetAllAsync();
         var totalCount = logs.Count();
-        var pagedLogs = logs.Skip(dto.page - 1).Take(dto.pageSize).ToList();
+        var pagedLogs = logs.Skip((dto.page-1)*dto.pageSize).Take(dto.pageSize).ToList();
         return new PagedResponseDto<AuditLogResponseDto> { Items = pagedLogs.Adapt<AuditLogResponseDto[]>(), TotalCount = totalCount };
     }
 }

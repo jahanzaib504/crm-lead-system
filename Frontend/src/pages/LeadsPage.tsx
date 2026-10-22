@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { usePagination } from "../hooks/usePagination";
 import type { Lead } from "../types/Lead";
+import { getAuditLogsPaged } from "../services/auditLogsService";
 
 const STAGES = [
     { id: 0, name: "All Stages" },
@@ -47,10 +48,10 @@ export const LeadsPage = ({ openPoolOnly = false }: LeadsPageProps) => {
     const roleName = currentUser?.role?.name;
     const queryClient = useQueryClient();
 
-    const {data, isPending, isError, page, pageSize, prevButton, nextButton} = usePagination<Lead>({
-        keys: ["leads", searchTerm, selectedStage, poolFilter], 
-        fn: ()=>getLeadsPaged(1, 8, searchTerm, selectedStage || undefined, poolFilter), page:1, pageSize:8
-    })
+    const { data, isPending, isError, totalCount, nextButton, prevButton, pageSize, page } = usePagination<Lead>({
+    keys: ["leads", searchTerm, selectedStage, poolFilter],
+    fn: (page, pageSize) => getLeadsPaged(page, pageSize, searchTerm, selectedStage, openPoolOnly) // Pass page and pageSize correctly
+})
 
     const acquireMutation = useMutation({
         mutationFn: (leadId: number) => acquireLead(leadId),
@@ -66,7 +67,6 @@ export const LeadsPage = ({ openPoolOnly = false }: LeadsPageProps) => {
     });
 
     const leads = data?.items ?? [];
-    const totalCount = data?.totalCount ?? 0;
     const totalPages = Math.ceil(totalCount / pageSize) || 1;
 
     return (
