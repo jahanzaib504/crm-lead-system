@@ -15,9 +15,9 @@ public partial class AuditLog
 
     public string? ChangesJson { get; set; }
 
-    public int PerformedByUserId { get; set; }
+    public int? PerformedByUserId { get; set; }
 
     public DateTime Timestamp { get; set; }
 
-    public virtual User PerformedByUser { get; set; } = null!;
+    public virtual User? PerformedByUser { get; set; } = null!;
 }

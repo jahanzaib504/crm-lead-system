@@ -1,4 +1,5 @@
 using Backend.Domain.Interfaces;
+using Backend.Domain.Models;
 using Backend.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -18,6 +19,7 @@ namespace Backend.Infrastructure
             services.AddScoped<INoteRepository, NoteRepository>();
             services.AddScoped<IFollowUpRepository, FollowUpRepository>();
             services.AddScoped<IActivityRepository, ActivityRepository>();
+            services.AddScoped<IAuditLogRepository, AuditLogRepository>();
             return services;
         }
 

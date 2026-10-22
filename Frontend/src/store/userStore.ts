@@ -5,14 +5,14 @@ interface UserStore{
     user: User | null,
     loading: boolean,
     setLoading: (arg0: boolean)=>void,
-    setUser: (user: User)=> void,
+    setUser: (user: User | null)=> void,
     updateUser: (fields: Partial<User>)=>void
 }
 
 const useUser = create<UserStore>((set)=>({
     user: null,
     loading: true,
-    setUser: (user)=>{
+    setUser: (user: User | null)=>{
         set({user});
     },
     setLoading: (loading)=> set({loading}),

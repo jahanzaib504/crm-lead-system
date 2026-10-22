@@ -9,6 +9,7 @@ export interface User{
     role: Role,
     roleId: number,
     managerId: number | null,
+    managerName?: string | null,
     isActive: boolean
 
     createdAt: string | null,

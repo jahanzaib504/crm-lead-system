@@ -28,6 +28,30 @@ public class UserService : IUserService
     private readonly IUserRepository _userRepo;
     private readonly IUserManager _userManager;
 
+    private UserResponseDto MapToDto(User user)
+    {
+        return new UserResponseDto
+        {
+            Id = user.Id,
+            FullName = user.FullName,
+            Email = user.Email,
+            RoleId = user.RoleId,
+
+            Role = new RoleDto { Id =  user.Role.Id , Name = user.Role.Name},
+
+            ManagerId = user.ManagerId,
+            ManagerName = user.Manager?.FullName,
+
+            IsActive = user.IsActive,
+
+            CreatedAt = user.CreatedAt,
+            CreatedBy = user.CreatedBy,
+
+            UpdatedAt = user.UpdatedAt,
+            UpdatedBy = user.UpdatedBy
+        };
+    }
+    
     public UserService(IUserRepository userRepo, IUserManager userManager)
     {
         _userRepo = userRepo ?? throw new ArgumentNullException(nameof(userRepo));
@@ -148,7 +172,7 @@ public class UserService : IUserService
             throw new NotFoundException("User not found.");
         }
 
-        return user.Adapt<UserResponseDto>();
+        return MapToDto(user);
     }
 
     public async Task<IEnumerable<UserResponseDto>> GetAllUsers()
@@ -159,12 +183,12 @@ public class UserService : IUserService
 
         if (currentUserRole == "Admin")
         {
-            return users.Adapt<UserResponseDto[]>();
+            return users.Select(MapToDto);
         }
 
         if (currentUserRole == "Sales Manager")
         {
-            return users.Where(u => u.ManagerId == currentUserId).Adapt<UserResponseDto[]>();
+            return users.Where(u => u.ManagerId == currentUserId).Select(MapToDto);
         }
 
         return Enumerable.Empty<UserResponseDto>();
@@ -173,14 +197,14 @@ public class UserService : IUserService
     public async Task<IEnumerable<UserResponseDto>> GetPendingUsers()
     {
         var users = await _userRepo.GetAllAsync();
-        return users.Where(u => !u.IsActive).Adapt<UserResponseDto[]>();
+        return users.Where(u => !u.IsActive).Select(MapToDto);
     }
 
     public async Task<IEnumerable<UserResponseDto>> GetManagers()
     {
         var users = await _userRepo.GetAllAsync();
         // Return active Sales Managers (role 2)
-        return users.Where(u => u.IsActive && u.RoleId == 2).Adapt<UserResponseDto[]>();
+        return users.Where(u => u.IsActive && u.RoleId == 2).Select(MapToDto);
     }
 
     public async Task<IEnumerable<UserResponseDto>> GetSalesReps()
@@ -191,10 +215,10 @@ public class UserService : IUserService
 
         if (string.Equals(currentRole, "Sales Manager", StringComparison.OrdinalIgnoreCase))
         {
-            return users.Where(u => u.IsActive && u.RoleId == 3 && u.ManagerId == currentUserId).Adapt<UserResponseDto[]>();
+            return users.Where(u => u.IsActive && u.RoleId == 3 && u.ManagerId == currentUserId).Select(MapToDto);
         }
 
         // Admin can see all active sales reps
-        return users.Where(u => u.IsActive && u.RoleId == 3).Adapt<UserResponseDto[]>();
+        return users.Where(u => u.IsActive && u.RoleId == 3).Select(MapToDto);
     }
 }

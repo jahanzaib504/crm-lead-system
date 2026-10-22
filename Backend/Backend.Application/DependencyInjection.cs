@@ -19,6 +19,8 @@ namespace Backend.Application
             services.AddScoped<IFollowUpService, FollowUpService>();
             services.AddScoped<IActivityService, ActivityService>();
             services.AddScoped<IAnalyticsService, AnalyticsService>();
+            services.AddScoped<IIntelligenceService, IntelligenceService>();
+            services.AddScoped<IAuditLogService, AuditLogService>();
             return services;
         }            
     }

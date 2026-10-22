@@ -12,6 +12,29 @@ public class AuthService
     private readonly IUserRepository _userRepo;
     private readonly TokenService _tokenService;
     private readonly IPasswordHasher<User> _passwordHasher;
+    private UserResponseDto MapToDto(User user)
+    {
+        return new UserResponseDto
+        {
+            Id = user.Id,
+            FullName = user.FullName,
+            Email = user.Email,
+            RoleId = user.RoleId,
+
+            Role = new RoleDto { Id = user.Role.Id, Name = user.Role.Name },
+
+            ManagerId = user.ManagerId,
+            ManagerName = user.Manager?.FullName,
+
+            IsActive = user.IsActive,
+
+            CreatedAt = user.CreatedAt,
+            CreatedBy = user.CreatedBy,
+
+            UpdatedAt = user.UpdatedAt,
+            UpdatedBy = user.UpdatedBy
+        };
+    }
     public AuthService(IUserRepository userRepo, TokenService tokenService, IPasswordHasher<User> passwordHasher)
     {
         _userRepo = userRepo;
@@ -51,7 +74,7 @@ public class AuthService
         return new AuthResponseDto
         {
             Token = string.Empty,
-            User = createdUser.Adapt<UserResponseDto>()
+            User = MapToDto(createdUser)
         };
     }
 
@@ -74,7 +97,7 @@ public class AuthService
         return new AuthResponseDto
         {
             Token = token,
-            User = user.Adapt<UserResponseDto>()
+            User = MapToDto(user)
         };
     }
 }

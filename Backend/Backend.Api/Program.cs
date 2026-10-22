@@ -106,6 +106,9 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseCors("AllowReactApp");
+//
+app.UseMiddleware<RequestLoggingMiddleware>();
+
 // Enable
 app.UseAuthentication();
 app.UseAuthorization();

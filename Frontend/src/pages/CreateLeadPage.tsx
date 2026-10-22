@@ -136,12 +136,19 @@ export const CreateLeadPage = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto my-10 p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
-      {/* Wizard Header Progress */}
-      <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
-        <h2 className="text-xl font-semibold text-gray-800">
-          {step === 0 ? "Step 1: Contact Information" : "Step 2: Lead Details"}
-        </h2>
+    <div className="min-h-screen bg-slate-50 py-10 px-4">
+      <div className="max-w-xl mx-auto mb-4 flex items-center justify-between">
+        <a href="/" className="text-xs font-semibold text-gray-500 hover:text-gray-800 transition">
+          &larr; Back to Home
+        </a>
+        <span className="text-xs font-medium text-gray-400">Public Inquiry Portal</span>
+      </div>
+      <div className="max-w-xl mx-auto p-6 bg-white border border-gray-200 rounded-2xl shadow-xs">
+        {/* Wizard Header Progress */}
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+          <h2 className="text-xl font-bold text-gray-800">
+            {step === 0 ? "Step 1: Contact Information" : "Step 2: Lead Details"}
+          </h2>
         <span className="text-sm font-medium text-gray-500">
           Step {step + 1} of 2
         </span>
@@ -340,6 +347,7 @@ export const CreateLeadPage = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };
