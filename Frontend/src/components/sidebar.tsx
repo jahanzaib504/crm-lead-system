@@ -26,7 +26,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Follow-ups", path: "/followups", icon: CalendarCheck },
   { label: "User Management", path: "/admin/users", icon: Users, roles: ["Admin"] },
   { label: "Create Lead", path: "/create-lead", icon: PlusCircle },
-  { label: "Audit Logs", path: "/audit-logs", icon:  DockIcon},
+  { label: "Audit Logs", path: "/audit-logs", icon:  DockIcon, roles: ["Admin"]},
 ];
 
 export const SideBar = () => {
