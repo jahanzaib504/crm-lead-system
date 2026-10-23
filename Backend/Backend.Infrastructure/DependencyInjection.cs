@@ -20,6 +20,8 @@ namespace Backend.Infrastructure
             services.AddScoped<IFollowUpRepository, FollowUpRepository>();
             services.AddScoped<IActivityRepository, ActivityRepository>();
             services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+            services.AddScoped<IContactRepository, ContactRepository>();
+            services.AddScoped<ICompanyRepositry, CompanyRepository>();
             return services;
         }
 
