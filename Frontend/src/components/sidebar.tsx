@@ -1,15 +1,18 @@
 import { useLocation, Link } from "react-router";
 import { useUser } from "../store/userStore";
-import { 
-  LayoutDashboard, 
-  Contact, 
-  Layers, 
-  CalendarCheck, 
-  Users, 
+import {
+  LayoutDashboard,
+  Contact,
+  Layers,
+  CalendarCheck,
+  Users,
   PlusCircle,
   Building2,
-  DockIcon
+  DockIcon,
+  Menu,
+  X
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 type NavItem = {
   label: string;
@@ -26,29 +29,57 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Follow-ups", path: "/followups", icon: CalendarCheck },
   { label: "User Management", path: "/admin/users", icon: Users, roles: ["Admin"] },
   { label: "Create Lead", path: "/create-lead", icon: PlusCircle },
-  { label: "Audit Logs", path: "/audit-logs", icon:  DockIcon, roles: ["Admin"]},
+  { label: "Audit Logs", path: "/audit-logs", icon: DockIcon, roles: ["Admin"] },
 ];
 
 export const SideBar = () => {
   const role = useUser((state) => state.user?.role);
   const location = useLocation();
+  const [open, setOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);  
 
   // Filter links based on current user role
   const filteredNavItems = NAV_ITEMS.filter(
     (item) => !item.roles || (role && item.roles.includes(role.name))
   );
 
-  return (
-    <aside className="w-60 min-h-screen bg-slate-900 text-slate-300 flex flex-col border-r border-slate-800 shrink-0">
+  // Close sidebar on route change (especially useful on mobile)
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
+
+  // Handle outside click to close mobile drawer
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []); 
+
+  const sidebarContent = (
+    <>
       {/* App Branding */}
-      <div className="h-16 flex items-center gap-3 px-6 border-b border-slate-800 bg-slate-950/40">
-        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold">
-          <Building2 className="w-5 h-5" />
+      <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800 bg-slate-950/40">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold">
+            <Building2 className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-base font-bold text-white tracking-wide leading-none">CRM Leads</h1>
+            <span className="text-[10px] text-slate-400 font-medium tracking-wider uppercase">Lead Management</span>
+          </div>
         </div>
-        <div>
-          <h1 className="text-base font-bold text-white tracking-wide leading-none">CRM Leads</h1>
-          <span className="text-[10px] text-slate-400 font-medium tracking-wider uppercase">Lead Management</span>
-        </div>
+        {/* Close button inside mobile drawer */}
+        <button 
+          className="sm:hidden text-slate-400 hover:text-white" 
+          onClick={() => setOpen(false)}
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Navigation Links */}
@@ -58,7 +89,7 @@ export const SideBar = () => {
         </div>
         {filteredNavItems.map((item) => {
           const Icon = item.icon;
-          const isActive = location.pathname === item.path || 
+          const isActive = location.pathname === item.path ||
             (item.path !== "/dashboard" && item.path !== "/create-lead" && location.pathname.startsWith(item.path));
 
           return (
@@ -89,6 +120,36 @@ export const SideBar = () => {
       <div className="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
         CRM Lead System &copy; 2026
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <div ref={wrapperRef}>
+      {/* Mobile Hamburger Button */}
+      <button 
+        className="sm:hidden fixed top-3 left-3 w-10 h-10 z-50 bg-slate-900 text-slate-200 rounded-lg flex items-center justify-center border border-slate-800 shadow-md" 
+        onClick={() => setOpen(!open)}
+        aria-label="Toggle Menu"
+      >
+        {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+      </button>
+
+      {/* Mobile Drawer Overlay */}
+      {open && (
+        <div className="fixed inset-0 bg-black/50 z-40 sm:hidden backdrop-blur-xs" />
+      )}
+
+      {/* Mobile Sidebar Drawer */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 border-r border-slate-800 flex flex-col transition-transform duration-300 ease-in-out sm:hidden ${
+        open ? "translate-x-0" : "-translate-x-full"
+      }`}>
+        {sidebarContent}
+      </aside>
+
+      {/* Desktop Sidebar */}
+      <aside className="w-[--sidebar-margin] min-h-screen bg-slate-900 text-slate-300 hidden border-r border-slate-800 shrink-0 sm:flex sm:flex-col sm:fixed">
+        {sidebarContent}
+      </aside>
+    </div>
   );
 };
