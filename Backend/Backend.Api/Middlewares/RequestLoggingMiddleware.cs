@@ -50,53 +50,53 @@ public class RequestLoggingMiddleware
 
             try
             {
-                var user = context.User;
-                var userIdClaim = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                    ?? user?.FindFirst("sub")?.Value
-                    ?? user?.FindFirst("nameid")?.Value;
+                //var user = context.User;
+                //var userIdClaim = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                //    ?? user?.FindFirst("sub")?.Value
+                //    ?? user?.FindFirst("nameid")?.Value;
 
-                int? parsedUserId = int.TryParse(userIdClaim, out int uid) ? uid : null;
+                //int? parsedUserId = int.TryParse(userIdClaim, out int uid) ? uid : null;
 
-                // Extract entity name and entity id from path segments (e.g. /leads/42 -> leads, 42)
-                var segments = path.Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
-                string entityName = segments.Length > 0 ? segments[0] : "http_request";
-                int entityId = 0;
-                if (segments.Length > 1 && int.TryParse(segments[1], out int idVal))
-                {
-                    entityId = idVal;
-                }
+                //// Extract entity name and entity id from path segments (e.g. /leads/42 -> leads, 42)
+                //var segments = path.Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
+                //string entityName = segments.Length > 0 ? segments[0] : "http_request";
+                //int entityId = 0;
+                //if (segments.Length > 1 && int.TryParse(segments[1], out int idVal))
+                //{
+                //    entityId = idVal;
+                //}
 
-                // Action max length is 20
-                string action = request.Method.ToUpperInvariant();
-                if (action.Length > 20) action = action.Substring(0, 20);
+                //// Action max length is 20
+                //string action = request.Method.ToUpperInvariant();
+                //if (action.Length > 20) action = action.Substring(0, 20);
 
-                var log = new AuditLog
-                {
-                    PerformedByUserId = parsedUserId,
-                    Action = action,
-                    EntityName = entityName.Length > 100 ? entityName.Substring(0, 100) : entityName,
-                    EntityId = entityId,
-                    ChangesJson = JsonSerializer.Serialize(new
-                    {
-                        method = request.Method,
-                        path = path,
-                        queryString = request.QueryString.HasValue ? request.QueryString.Value : null,
-                        statusCode = context.Response.StatusCode,
-                        durationMs = stopwatch.ElapsedMilliseconds
-                    }),
-                    Timestamp = DateTime.UtcNow
-                };
+                //var log = new AuditLog
+                //{
+                //    PerformedByUserId = parsedUserId,
+                //    Action = action,
+                //    EntityName = entityName.Length > 100 ? entityName.Substring(0, 100) : entityName,
+                //    EntityId = entityId,
+                //    ChangesJson = JsonSerializer.Serialize(new
+                //    {
+                //        method = request.Method,
+                //        path = path,
+                //        queryString = request.QueryString.HasValue ? request.QueryString.Value : null,
+                //        statusCode = context.Response.StatusCode,
+                //        durationMs = stopwatch.ElapsedMilliseconds
+                //    }),
+                //    Timestamp = DateTime.UtcNow
+                //};
 
-                db.AuditLogs.Add(log);
-                await db.SaveChangesAsync();
+                //db.AuditLogs.Add(log);
+                //await db.SaveChangesAsync();
 
-                _logger.LogInformation(
-                    "[AUDIT LOG] {Method} {Path} | Status: {Status} | UserId: {UserId} | Duration: {Duration}ms",
-                    request.Method,
-                    path,
-                    context.Response.StatusCode,
-                    userIdClaim ?? "Anonymous",
-                    stopwatch.ElapsedMilliseconds);
+                //_logger.LogInformation(
+                //    "[AUDIT LOG] {Method} {Path} | Status: {Status} | UserId: {UserId} | Duration: {Duration}ms",
+                //    request.Method,
+                //    path,
+                //    context.Response.StatusCode,
+                //    userIdClaim ?? "Anonymous",
+                //    stopwatch.ElapsedMilliseconds);
             }
             catch (Exception ex)
             {

@@ -46,7 +46,7 @@ function App() {
 
   return (
     <>
-      <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
+      <Toaster toastOptions={{ duration: 1000 }} />
       <Routes>
         {/* Public Routes */}
         <Route path='/' element={<IndexPage />} />

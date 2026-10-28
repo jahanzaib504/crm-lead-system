@@ -98,7 +98,7 @@ export const SideBar = () => {
               to={item.path}
               className={`flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-blue-600 text-white shadow-sm font-semibold"
+                  ? "bg-purple-600 text-white shadow-sm font-semibold"
                   : "text-slate-400 hover:bg-slate-800/70 hover:text-slate-100"
               }`}
             >
@@ -147,7 +147,7 @@ export const SideBar = () => {
       </aside>
 
       {/* Desktop Sidebar */}
-      <aside className="w-[--sidebar-margin] min-h-screen bg-slate-900 text-slate-300 hidden border-r border-slate-800 shrink-0 sm:flex sm:flex-col sm:fixed">
+      <aside className="w-(--sidebar-margin) min-h-screen bg-slate-900 text-slate-300 hidden border-r border-slate-800 shrink-0 md:flex md:flex-col md:fixed">
         {sidebarContent}
       </aside>
     </div>

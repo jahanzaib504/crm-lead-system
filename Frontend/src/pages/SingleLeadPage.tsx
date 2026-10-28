@@ -27,6 +27,7 @@ import {
     X,
     UserPlus
 } from "lucide-react";
+import { getCurrentDate, getCurrentDateTime } from "../utils/timeManagement";
 
 const STAGES = [
     { id: 1, name: "New", color: "bg-blue-50 text-blue-700 border-blue-200" },
@@ -276,7 +277,7 @@ export const SingleLeadPage = () => {
                         <div>
                             <span className="block text-[11px] font-semibold uppercase tracking-wider text-gray-400">Budget</span>
                             <span className="text-lg font-bold text-gray-900">
-                                {lead.estimatedValue ? `$${lead.estimatedValue.toLocaleString()}` : "N/A"}
+                                {lead.estimatedValue ? `Rs. ${lead.estimatedValue.toLocaleString()}` : "N/A"}
                             </span>
                         </div>
                         <div className="border-l border-gray-200 pl-6">
@@ -710,6 +711,7 @@ export const SingleLeadPage = () => {
                                         type="date"
                                         required
                                         value={followUpForm.dueDate}
+                                        min={getCurrentDate()} // Prevent selecting past dates
                                         onChange={(e) => setFollowUpForm({ ...followUpForm, dueDate: e.target.value })}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-blue-500"
                                     />
@@ -796,6 +798,7 @@ export const SingleLeadPage = () => {
                                     <input
                                         type="datetime-local"
                                         value={activityForm.activityDate}
+                                        max={getCurrentDateTime()} // Prevent selecting future dates
                                         onChange={(e) => setActivityForm({ ...activityForm, activityDate: e.target.value })}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs outline-none focus:border-blue-500"
                                     />

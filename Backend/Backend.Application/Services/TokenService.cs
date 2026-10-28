@@ -14,7 +14,7 @@ public class TokenService
     public TokenService(IConfiguration config) {
         _config = config;
     }
-    public string CreateToken(User user)
+    public (string, DateTime) CreateToken(User user)
     {
         var jwtSettings = _config.GetSection("JwtSettings");
         var secretKey = Encoding.UTF8.GetBytes(jwtSettings["Secret"]!);
@@ -30,16 +30,16 @@ public class TokenService
         };
         var key = new SymmetricSecurityKey(secretKey);
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
+        var expiresAt = DateTime.UtcNow.AddMinutes(double.Parse(jwtSettings["ExpirationInMinutes"]!));
         var token = new JwtSecurityToken(
             issuer: jwtSettings["Issuer"],
             audience: jwtSettings["Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(double.Parse(jwtSettings["ExpirationInMinutes"]!)),
+            expires: expiresAt,
             signingCredentials: creds
         );
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return (new JwtSecurityTokenHandler().WriteToken(token), expiresAt);
 
     }
 }

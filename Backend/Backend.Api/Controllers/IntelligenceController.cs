@@ -1,12 +1,14 @@
 ﻿using Backend.Application.Dtos.Common;
 using Backend.Application.Dtos.Lead;
 using Backend.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Api.Controllers;
 
 [ApiController]
 [Route("intelligence")]
+[Authorize(Roles = "Admin,Sales Manager")]
 public class IntelligenceController
 {
     private readonly IIntelligenceService _intelligenceService;

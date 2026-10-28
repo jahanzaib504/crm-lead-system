@@ -92,12 +92,13 @@ public class AuthService
             throw new UnauthorizedException("Your account is pending administrator approval. Please wait for an administrator to activate your account.");
         }
 
-        var token = _tokenService.CreateToken(user);
+        var (token, expiresAt) = _tokenService.CreateToken(user);
 
         return new AuthResponseDto
         {
             Token = token,
-            User = MapToDto(user)
+            User = MapToDto(user),
+            ExpiresAt = expiresAt
         };
     }
 }

@@ -236,7 +236,7 @@ export const LeadsPage = ({ openPoolOnly = false }: LeadsPageProps) => {
                                             <span className="text-gray-400 block text-[10px] uppercase font-semibold">Budget / Score</span>
                                             <div className="flex items-center gap-2">
                                                 <span className="font-bold text-gray-900">
-                                                    {lead.estimatedValue ? `$${lead.estimatedValue.toLocaleString()}` : "N/A"}
+                                                    {lead.estimatedValue ? `Rs. ${lead.estimatedValue.toLocaleString()}` : "N/A"}
                                                 </span>
                                                 <span className="text-gray-300">•</span>
                                                 <span className="font-semibold text-blue-600">

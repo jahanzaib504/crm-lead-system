@@ -11,15 +11,32 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    // Retrieve token from storage (e.g., localStorage in browser or env variable)
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    const expiresAt = typeof window !== "undefined" ? localStorage.getItem("expiresAt") : null;
-    console.log(expiresAt)
-    // if(expiresAt && Date.now() >= Date.parse(expiresAt) || !expiresAt){ // If current time is greater than expires at
-    //   localStorage.removeItem("token");
-    //   localStorage.removeItem("expiresAt");
-    //   useUser.setState({user: null}); // Discard the user
-    // }
+    if (typeof window === "undefined") {
+      return config;
+    }
+
+    const token = localStorage.getItem("token");
+    const expiresAt = localStorage.getItem("expiresAt");
+
+    if (expiresAt) {
+      const expirationTime = Date.parse(expiresAt);
+
+      // Check if expiration date is valid AND current time has passed it
+      if (!isNaN(expirationTime) && Date.now() >= expirationTime) {
+        // Clear storage
+        console.log("Token expired");
+        localStorage.removeItem("token");
+        localStorage.removeItem("expiresAt");
+
+        // Clear Zustand state
+        useUser.setState({ user: null });
+        
+        // Throw error to prevent sending an unauthenticated request to backend
+        return Promise.reject(new Error("Token expired. Please log in again."));
+      }
+    }
+
+    // Attach token if valid
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

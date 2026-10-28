@@ -81,6 +81,84 @@ public class LeadService : ILeadService
         };
     }
 
+    private static bool IsClosedWonLead(Lead lead)
+    {
+        if (lead == null) return false;
+
+        if (lead.LeadStage != null)
+        {
+            return string.Equals(lead.LeadStage.Name, "Closed Won", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return lead.LeadStageId == 5;
+    }
+
+    private static decimal CalculateLeadScore(Lead lead, IEnumerable<Lead> allLeads)
+    {
+        if (lead == null) return 0m;
+
+        var historicalLeads = allLeads ?? Enumerable.Empty<Lead>();
+        var sameContactHistory = historicalLeads
+            .Where(l => l.Id != lead.Id && l.ContactId == lead.ContactId)
+            .ToList();
+
+        var sameCompanyHistory = historicalLeads
+            .Where(l => l.Id != lead.Id && l.CompanyId.HasValue && lead.CompanyId.HasValue && l.CompanyId == lead.CompanyId)
+            .ToList();
+
+        var contactWinRate = sameContactHistory.Count > 0
+            ? sameContactHistory.Count(l => IsClosedWonLead(l)) / (decimal)sameContactHistory.Count
+            : 0m;
+
+        var companyWinRate = sameCompanyHistory.Count > 0
+            ? sameCompanyHistory.Count(l => IsClosedWonLead(l)) / (decimal)sameCompanyHistory.Count
+            : 0m;
+
+        var recentWins = sameContactHistory
+            .Concat(sameCompanyHistory)
+            .DistinctBy(l => l.Id)
+            .Count(l => IsClosedWonLead(l) && l.CreatedAt >= DateTime.UtcNow.AddDays(-90));
+
+        decimal score = 0m;
+
+        score += Math.Min(contactWinRate * 35m, 35m);
+        score += Math.Min(companyWinRate * 25m, 25m);
+        score += Math.Min(sameContactHistory.Count(l => IsClosedWonLead(l)) * 10m, 20m);
+        score += Math.Min(sameCompanyHistory.Count(l => IsClosedWonLead(l)) * 8m, 15m);
+        score += Math.Min(recentWins * 4m, 15m);
+
+        if (lead.EstimatedValue.HasValue)
+        {
+            score += Math.Min(lead.EstimatedValue.Value / 10000m, 12m);
+        }
+
+        if (lead.LeadStage != null)
+        {
+            score += Math.Min((lead.LeadStage.ConversionWeight / 10m) * 2m, 12m);
+        }
+        else if (lead.LeadStageId > 0)
+        {
+            score += Math.Min(lead.LeadStageId * 1.5m, 12m);
+        }
+
+        if (!string.IsNullOrWhiteSpace(lead.Contact?.Email))
+        {
+            score += 5m;
+        }
+
+        if (!string.IsNullOrWhiteSpace(lead.Company?.Name))
+        {
+            score += 5m;
+        }
+
+        if (!string.IsNullOrWhiteSpace(lead.Query))
+        {
+            score += 3m;
+        }
+
+        return Math.Clamp(score, 0m, 100m);
+    }
+
     private bool IsUserAuthorizedForLead(Lead lead)
     {
         int? currentUserId = _userManager.GetCurrentUserId();
@@ -151,7 +229,19 @@ public class LeadService : ILeadService
                 (l.Company != null && l.Company.Name.ToLowerInvariant().Contains(s)));
         }
 
-        var list = query.OrderByDescending(l => l.CreatedAt).ToList();
+        var fullLeadHistory = await _leadRepository.GetAllAsync();
+
+        var list = query
+            .Select(l =>
+            {
+                l.CurrentScore = CalculateLeadScore(l, fullLeadHistory);
+                return l;
+            })
+            .OrderByDescending(l => l.CurrentScore ?? 0m)
+            .ThenByDescending(l => l.EstimatedValue ?? 0m)
+            .ThenByDescending(l => l.CreatedAt)
+            .ToList();
+
         var totalCount = list.Count;
         var pagedItems = list.Skip((pageNumber - 1) * pageSize).Take(pageSize).Select(MapToDto).ToArray();
 
@@ -165,8 +255,19 @@ public class LeadService : ILeadService
     public async Task<IEnumerable<LeadResponseDto>> GetOpenPoolLeads()
     {
         var leads = await _leadRepository.GetAllAsync();
-        var openLeads = leads.Where(l => l.ManagerId == null && l.AssignedToUserId == null && IsUserAuthorizedForLead(l));
-        return openLeads.OrderByDescending(l => l.CreatedAt).Select(MapToDto);
+        var openLeads = leads
+            .Where(l => l.ManagerId == null && l.AssignedToUserId == null && IsUserAuthorizedForLead(l))
+            .Select(l =>
+            {
+                l.CurrentScore = CalculateLeadScore(l, leads);
+                return l;
+            })
+            .OrderByDescending(l => l.CurrentScore ?? 0m)
+            .ThenByDescending(l => l.EstimatedValue ?? 0m)
+            .ThenByDescending(l => l.CreatedAt)
+            .Select(MapToDto);
+
+        return openLeads;
     }
 
     public async Task<IEnumerable<LeadResponseDto>> GetByStageIdAsync(int stageId)

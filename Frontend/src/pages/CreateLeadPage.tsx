@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { createLeadWithContact } from "../services/leadService";
 import toast from "react-hot-toast";
+import { useUser } from "../store/userStore";
+import { Link } from "react-router/internal/react-server-client";
 
 interface LeadForm {
   firstName: string;
@@ -29,7 +31,7 @@ interface FormErrors {
 export const CreateLeadPage = () => {
   const [step, setStep] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
+  const user = useUser((state) => state.user);
   const [lead, setLead] = useState<LeadForm>({
     firstName: "",
     lastName: "",
@@ -138,9 +140,11 @@ export const CreateLeadPage = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
       <div className="max-w-xl mx-auto mb-4 flex items-center justify-between">
-        <a href="/" className="text-xs font-semibold text-gray-500 hover:text-gray-800 transition">
+        {user && <div className="text-xs font-semibold text-gray-500 hover:text-gray-800 transition"><Link to="/dashboard">&larr; Back to Dashboard</Link></div>}
+        
+        {!user && <a href="/" className="text-xs font-semibold text-gray-500 hover:text-gray-800 transition">
           &larr; Back to Home
-        </a>
+        </a>}
         <span className="text-xs font-medium text-gray-400">Public Inquiry Portal</span>
       </div>
       <div className="max-w-xl mx-auto p-6 bg-white border border-gray-200 rounded-2xl shadow-xs">
@@ -311,7 +315,7 @@ export const CreateLeadPage = () => {
 
           <div>
             <label htmlFor="estimatedValue" className="block text-sm font-medium text-gray-700 mb-1">
-              Estimated Deal Value ($)
+              Estimated Deal Value (Rs. )
             </label>
             <input
               type="number"

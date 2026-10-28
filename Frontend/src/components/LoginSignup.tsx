@@ -94,15 +94,15 @@ const LoginSignup = ({ isLoginPage = false }: LoginSignupProps) => {
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-600 text-white shadow-lg mb-3">
                     <Building2 className="w-6 h-6" />
                 </div>
-                <h2 className="text-3xl font-extrabold text-white tracking-tight">
+                <h2 className=" text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                     CRM Lead System
                 </h2>
-                <p className="mt-2 text-sm text-slate-400">
+                <p className="mt-2 text-xs sm:text-sm text-slate-400">
                     {isLoginPage ? "Sign in to your CRM workspace" : "Register for staff access"}
                 </p>
             </div>
 
-            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <div className="mt-8 max-w-md w-full mx-auto sm:w-full sm:max-w-lg">
                 <div className="bg-white py-8 px-6 shadow-2xl rounded-2xl sm:px-10 border border-gray-100">
                     {registrationSuccess ? (
                         <div className="text-center space-y-4 py-4">

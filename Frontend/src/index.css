@@ -1,4 +1,5 @@
 @import "tailwindcss";
 :root{
     --sidebar-margin: 240px;
+    --desktop-breakpoint: 500px;
 }

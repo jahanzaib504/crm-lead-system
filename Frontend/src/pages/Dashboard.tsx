@@ -7,24 +7,25 @@ import { getMyPendingFollowUps, updateFollowUpStatus } from "../services/followU
 import { useState } from "react";
 import { Link } from "react-router";
 import toast from "react-hot-toast";
-import { 
-    Users, 
-    Layers, 
-    DollarSign, 
-    Clock, 
-    ArrowRight, 
-    Calendar, 
+import {
+    Users,
+    Layers,
+    DollarSign,
+    Clock,
+    ArrowRight,
+    Calendar,
     Activity,
     Check,
-    X
+    X,
+    IndianRupee
 } from "lucide-react";
-import { 
-    BarChart, 
-    Bar, 
-    XAxis, 
-    YAxis, 
-    Tooltip, 
-    ResponsiveContainer, 
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    Tooltip,
+    ResponsiveContainer,
     Cell,
     PieChart,
     Pie
@@ -166,11 +167,11 @@ export const Dashboard = () => {
                             <div className="flex items-center justify-between text-gray-500 mb-2">
                                 <span className="text-xs font-semibold uppercase tracking-wider">Pipeline Value</span>
                                 <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                                    <DollarSign className="w-4 h-4" />
+                                    <IndianRupee className="w-4 h-4" />
                                 </div>
                             </div>
                             <div className="text-2xl font-bold text-gray-900">
-                                ${(analytics?.totalPipelineValue ?? 0).toLocaleString()}
+                                Rs. {(analytics?.totalPipelineValue ?? 0).toLocaleString()}
                             </div>
                             <div className="text-xs text-emerald-600 font-medium mt-1">
                                 {analytics?.convertedLeads ?? 0} deals won ({analytics?.conversionRate ?? 0}% win rate)
@@ -223,7 +224,7 @@ export const Dashboard = () => {
                                             <button
                                                 onClick={() => {
                                                     setSelectedPendingUser(pUser);
-                                                    
+
                                                 }}
                                                 className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs transition"
                                             >
@@ -274,9 +275,10 @@ export const Dashboard = () => {
                                                 nameKey="source"
                                                 cx="50%"
                                                 cy="50%"
-                                                innerRadius={45}
-                                                outerRadius={75}
+                                                innerRadius={65}
+                                                outerRadius={90}
                                                 paddingAngle={4}
+                                                cornerRadius="5%"
                                             >
                                                 {analytics.sourceBreakdown.map((_, index) => (
                                                     <Cell key={`slice-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
@@ -342,7 +344,7 @@ export const Dashboard = () => {
                                 </div>
                             </div>
                             <div className="text-2xl font-bold text-gray-900">
-                                ${(analytics?.teamPipelineValue ?? 0).toLocaleString()}
+                                Rs. {(analytics?.teamPipelineValue ?? 0).toLocaleString()}
                             </div>
                             <div className="text-xs text-emerald-600 mt-1">
                                 {analytics?.convertedLeads ?? 0} Closed Won deals
@@ -362,8 +364,8 @@ export const Dashboard = () => {
                     </div>
 
                     {/* Open Pool Preview */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-slate-50/50">
+                    <div className="bg-[##C084FC] rounded-xl border border-gray-200 shadow-xs overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between ">
                             <div>
                                 <h3 className="font-semibold text-gray-900">Open Leads Pool Available for Acquisition</h3>
                                 <p className="text-xs text-gray-500">Claim these inbound leads to allocate to your representatives</p>
@@ -373,9 +375,9 @@ export const Dashboard = () => {
                             </Link>
                         </div>
                         {openPoolLeads && openPoolLeads.length > 0 ? (
-                            <div className="divide-y divide-gray-100">
-                                {openPoolLeads.slice(0, 5).map((opLead) => (
-                                    <div key={opLead.id} className="p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-gray-50/50">
+                            <div className="divide-y divide-gray-200">
+                                {openPoolLeads.slice(0, 5).map((opLead) => ( // Showing top 5 results
+                                    <div key={opLead.id} className="p-4 sm:px-6 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-center justify-evenly gap-5 hover:bg-gray-50/50">
                                         <div className="space-y-1">
                                             <div className="flex items-center gap-2">
                                                 <span className="font-semibold text-gray-900 text-sm">{opLead.title}</span>
@@ -386,13 +388,37 @@ export const Dashboard = () => {
                                             <p className="text-xs text-gray-500">
                                                 Contact: <span className="font-medium text-gray-700">{opLead.contactName || "Direct Inquiry"}</span>
                                                 {opLead.contactEmail && ` • ${opLead.contactEmail}`}
-                                                {opLead.estimatedValue ? ` • Est. Budget: $${opLead.estimatedValue.toLocaleString()}` : ""}
+                                                {opLead.estimatedValue ? ` • Est. Budget: Rs. ${opLead.estimatedValue.toLocaleString()}` : ""}
                                             </p>
                                         </div>
+                                        {opLead.currentScore && <div className="flex flex-col gap-1.5 w-36 shrink-0">
+                                            {/* Header Label & Percentage Badge */}
+                                            <div className="flex items-center justify-between text-xs">
+                                                <span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">
+                                                    Lead Score
+                                                </span>
+                                                <span className="font-bold text-slate-900">
+                                                    {opLead.currentScore.toFixed(1)}<span className="text-slate-400 font-normal">%</span>
+                                                </span>
+                                            </div>
+
+                                            {/* Progress Bar Container */}
+                                            <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60 shadow-inner">
+                                                <div
+                                                    className={`h-full rounded-full transition-all duration-500 ease-out ${opLead.currentScore >= 75
+                                                            ? "bg-emerald-500 shadow-sm shadow-emerald-500/30"
+                                                            : opLead.currentScore >= 40
+                                                                ? "bg-indigo-600 shadow-sm shadow-indigo-600/30"
+                                                                : "bg-amber-500 shadow-sm shadow-amber-500/30"
+                                                        }`}
+                                                    style={{ width: `${Math.min(Math.max(opLead.currentScore, 0), 100)}%` }}
+                                                />
+                                            </div>
+                                        </div>}
                                         <button
                                             onClick={() => acquireMutation.mutate(opLead.id)}
                                             disabled={acquireMutation.isPending}
-                                            className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-xs transition shrink-0 cursor-pointer"
+                                            className="px-3.5 py-1.5 w-fit bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-xs transition shrink-0 cursor-pointer"
                                         >
                                             Acquire Lead
                                         </button>
@@ -426,7 +452,7 @@ export const Dashboard = () => {
                                         <tr key={rep.repId} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 font-medium text-gray-900">{rep.repName}</td>
                                             <td className="px-6 py-4 text-gray-700 font-semibold">{rep.leadCount}</td>
-                                            <td className="px-6 py-4 text-emerald-600 font-semibold">${(rep.totalValue ?? 0).toLocaleString()}</td>
+                                            <td className="px-6 py-4 text-emerald-600 font-semibold">Rs. {(rep.totalValue ?? 0).toLocaleString()}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -466,7 +492,7 @@ export const Dashboard = () => {
                                 </div>
                             </div>
                             <div className="text-2xl font-bold text-gray-900">
-                                ${(analytics?.myPipelineValue ?? 0).toLocaleString()}
+                                Rs. {(analytics?.myPipelineValue ?? 0).toLocaleString()}
                             </div>
                             <div className="text-xs text-emerald-600 font-medium mt-1">
                                 {analytics?.convertedLeads ?? 0} Closed Won deals
@@ -527,11 +553,10 @@ export const Dashboard = () => {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase ${
-                                                fu.priority === "High" ? "bg-red-50 text-red-700 border border-red-200" :
+                                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase ${fu.priority === "High" ? "bg-red-50 text-red-700 border border-red-200" :
                                                 fu.priority === "Medium" ? "bg-amber-50 text-amber-700 border border-amber-200" :
-                                                "bg-slate-50 text-slate-700 border border-slate-200"
-                                            }`}>
+                                                    "bg-slate-50 text-slate-700 border border-slate-200"
+                                                }`}>
                                                 {fu.priority}
                                             </span>
                                             <Link
@@ -553,7 +578,7 @@ export const Dashboard = () => {
                 </div>
             )}
 
-            {selectedPendingUser && <UserAccessModal selectedUser={selectedPendingUser} setSelectedUser={setSelectedPendingUser}/>}
+            {selectedPendingUser && <UserAccessModal selectedUser={selectedPendingUser} setSelectedUser={setSelectedPendingUser} />}
         </div>
     );
 };
