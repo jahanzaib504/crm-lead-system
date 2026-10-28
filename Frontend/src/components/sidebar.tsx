@@ -127,7 +127,7 @@ export const SideBar = () => {
     <div ref={wrapperRef}>
       {/* Mobile Hamburger Button */}
       <button 
-        className="sm:hidden fixed top-3 left-3 w-10 h-10 z-50 bg-slate-900 text-slate-200 rounded-lg flex items-center justify-center border border-slate-800 shadow-md" 
+        className="md:hidden fixed top-3 left-3 w-10 h-10 z-50 bg-slate-900 text-slate-200 rounded-lg flex items-center justify-center border border-slate-800 shadow-md" 
         onClick={() => setOpen(!open)}
         aria-label="Toggle Menu"
       >

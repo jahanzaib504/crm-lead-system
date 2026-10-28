@@ -31,7 +31,7 @@ export const TopNavbar = () => {
 
     return (
         <header className="h-16 bg-white border-b border-gray-200 px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
-            <div className="flex items-center gap-4">
+            <div className="ml-10 flex items-center gap-4 md:ml-0">
                 <span className="text-sm text-gray-500 font-medium">
                     Welcome back, <span className="font-semibold text-gray-800">{user?.fullName || "User"}</span>
                 </span>

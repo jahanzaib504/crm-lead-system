@@ -34,9 +34,15 @@ export const login = async ({ email, password }: LoginArgs): Promise<LoginRespon
     return request.data;
 };
 
-export const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("expiresAt");
-    window.location.href = "/login"; // Navigate to /login immediately
+export const logout = async () => {
+    try {
+        await api.post("/auth/logout");
+    } catch (error) {
+        console.error("Failed to record the logout audit event.", error);
+    } finally {
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("expiresAt");
+        window.location.href = "/login";
+    }
 };

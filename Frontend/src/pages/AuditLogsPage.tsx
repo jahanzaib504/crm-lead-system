@@ -48,7 +48,8 @@ export const AuditLogsPage = () => {
                                         <th className="py-3.5 px-6">ID</th>
                                         <th className="py-3.5 px-6">Timestamp</th>
                                         <th className="py-3.5 px-6">User ID</th>
-                                        <th className="py-3.5 px-6">Action / Entity</th>
+                                        <th className="py-3.5 px-6">Entity</th>
+                                        <th className="py-3.5 px-6">Action</th>
                                         <th className="py-3.5 px-6">Changes</th>
                                     </tr>
                                 </thead>
@@ -68,6 +69,11 @@ export const AuditLogsPage = () => {
                                                 <td className="py-4 px-6">
                                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-zinc-100 text-zinc-800">
                                                         {log.entityName}
+                                                    </span>
+                                                </td>
+                                                <td className="py-4 px-6">
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-zinc-100 text-zinc-800">
+                                                        {log.action}
                                                     </span>
                                                 </td>
                                                 <td className="py-4 px-6 font-mono text-xs text-zinc-500 max-w-xs truncate" title={log.changesJson}>

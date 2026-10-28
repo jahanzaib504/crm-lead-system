@@ -8,24 +8,26 @@ import { getSalesReps, getManagers } from "../services/userService";
 import { useUser } from "../store/userStore";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { 
-    Mail, 
-    Phone, 
-    Briefcase, 
-    Building2, 
-    User, 
-    ArrowLeft, 
-    Plus, 
-    MessageSquare, 
-    CheckSquare, 
-    Activity as ActivityIcon, 
-    PhoneCall, 
-    Users as UsersIcon, 
-    Video, 
+import {
+    Mail,
+    Phone,
+    Briefcase,
+    Building2,
+    User,
+    ArrowLeft,
+    Plus,
+    MessageSquare,
+    CheckSquare,
+    Activity as ActivityIcon,
+    PhoneCall,
+    Users as UsersIcon,
+    Video,
     FileText,
     Check,
     X,
-    UserPlus
+    UserPlus,
+    Loader,
+    LoaderCircle
 } from "lucide-react";
 import { getCurrentDate, getCurrentDateTime } from "../utils/timeManagement";
 
@@ -58,7 +60,7 @@ export const SingleLeadPage = () => {
     const [activityForm, setActivityForm] = useState({ activityType: "Call", subject: "", summary: "", activityDate: new Date().toISOString().slice(0, 16) });
 
     const [noteContent, setNoteContent] = useState("");
-
+    const [updatingStage, setUpdatingStage] = useState<number | null>(null);
     // Queries
     const { data: lead, isPending: leadLoading, isError: leadError } = useQuery({
         queryKey: ["lead", leadId],
@@ -116,7 +118,8 @@ export const SingleLeadPage = () => {
             queryClient.invalidateQueries({ queryKey: ["lead", leadId] });
             queryClient.invalidateQueries({ queryKey: ["leads"] });
         },
-        onError: () => toast.error("Failed to update stage.")
+        onError: () => toast.error("Failed to update stage."),
+        onSettled: () => setUpdatingStage(null)
     });
 
     const assignMutation = useMutation({
@@ -261,9 +264,8 @@ export const SingleLeadPage = () => {
                     <div>
                         <div className="flex items-center gap-3 flex-wrap">
                             <h1 className="text-2xl font-bold text-gray-900">{lead.title}</h1>
-                            <span className={`px-3 py-0.5 rounded-full text-xs font-semibold border ${
-                                STAGES.find(s => s.id === lead.leadStageId)?.color || "bg-gray-100 text-gray-700"
-                            }`}>
+                            <span className={`px-3 py-0.5 rounded-full text-xs font-semibold border ${STAGES.find(s => s.id === lead.leadStageId)?.color || "bg-gray-100 text-gray-700"
+                                }`}>
                                 {lead.leadStage?.name || "New"}
                             </span>
                         </div>
@@ -306,15 +308,25 @@ export const SingleLeadPage = () => {
                             return (
                                 <button
                                     key={stg.id}
-                                    onClick={() => stageMutation.mutate(stg.id)}
+                                    onClick={() => {
+                                        setUpdatingStage(stg.id);
+                                        stageMutation.mutate(stg.id);
+                                    }}
                                     disabled={isCurrent || stageMutation.isPending}
-                                    className={`py-2 px-3 rounded-lg text-xs font-semibold transition border text-center ${
-                                        isCurrent 
-                                            ? "bg-slate-900 text-white border-slate-900 shadow-xs ring-2 ring-slate-200" 
-                                            : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
-                                    }`}
+                                    className={`py-2 px-3 rounded-lg text-xs font-semibold transition border
+                                    inline-flex items-center justify-center gap-2
+                                    ${isCurrent
+                                    ? "bg-slate-900 text-white border-slate-900 shadow-xs ring-2 ring-slate-200"
+                                    : "bg-white text-gray-700 border-gray-200 hover:bg-gray-100 hover:border-gray-300 hover:cursor-pointer"
+                                }
+                                    ${updatingStage === stg.id ? "opacity-70 cursor-wait" : ""}
+                                `}
                                 >
                                     {stg.name}
+
+                                    {updatingStage === stg.id && (
+                                        <LoaderCircle className="h-4 w-4 animate-spin shrink-0" />
+                                    )}
                                 </button>
                             );
                         })}
@@ -397,11 +409,10 @@ export const SingleLeadPage = () => {
                 <div className="flex border-b border-gray-200 bg-slate-50/50 px-6 pt-2">
                     <button
                         onClick={() => setActiveTab("notes")}
-                        className={`flex items-center gap-2 py-3 px-4 text-sm font-semibold border-b-2 transition ${
-                            activeTab === "notes"
+                        className={`flex items-center gap-2 py-3 px-4 text-sm font-semibold border-b-2 transition ${activeTab === "notes"
                                 ? "border-blue-600 text-blue-600"
                                 : "border-transparent text-gray-500 hover:text-gray-800"
-                        }`}
+                            }`}
                     >
                         <MessageSquare className="w-4 h-4" />
                         Internal Notes ({notes?.length ?? 0})
@@ -409,11 +420,10 @@ export const SingleLeadPage = () => {
 
                     <button
                         onClick={() => setActiveTab("followups")}
-                        className={`flex items-center gap-2 py-3 px-4 text-sm font-semibold border-b-2 transition ${
-                            activeTab === "followups"
+                        className={`flex items-center gap-2 py-3 px-4 text-sm font-semibold border-b-2 transition ${activeTab === "followups"
                                 ? "border-blue-600 text-blue-600"
                                 : "border-transparent text-gray-500 hover:text-gray-800"
-                        }`}
+                            }`}
                     >
                         <CheckSquare className="w-4 h-4" />
                         Follow-ups & Tasks ({followUps?.length ?? 0})
@@ -421,11 +431,10 @@ export const SingleLeadPage = () => {
 
                     <button
                         onClick={() => setActiveTab("activities")}
-                        className={`flex items-center gap-2 py-3 px-4 text-sm font-semibold border-b-2 transition ${
-                            activeTab === "activities"
+                        className={`flex items-center gap-2 py-3 px-4 text-sm font-semibold border-b-2 transition ${activeTab === "activities"
                                 ? "border-blue-600 text-blue-600"
                                 : "border-transparent text-gray-500 hover:text-gray-800"
-                        }`}
+                            }`}
                     >
                         <ActivityIcon className="w-4 h-4" />
                         Activity Log ({activities?.length ?? 0})
@@ -506,11 +515,10 @@ export const SingleLeadPage = () => {
                                                         id: fu.id,
                                                         status: fu.status === "Completed" ? "Pending" : "Completed"
                                                     })}
-                                                    className={`w-5 h-5 mt-0.5 rounded-full border flex items-center justify-center transition cursor-pointer ${
-                                                        fu.status === "Completed"
+                                                    className={`w-5 h-5 mt-0.5 rounded-full border flex items-center justify-center transition cursor-pointer ${fu.status === "Completed"
                                                             ? "bg-emerald-600 border-emerald-600 text-white"
                                                             : "border-gray-300 hover:border-emerald-500 text-transparent"
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <Check className="w-3.5 h-3.5" />
                                                 </button>
@@ -525,11 +533,10 @@ export const SingleLeadPage = () => {
                                                 </div>
                                             </div>
 
-                                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase ${
-                                                fu.priority === "High" ? "bg-red-50 text-red-700 border border-red-200" :
-                                                fu.priority === "Medium" ? "bg-amber-50 text-amber-700 border border-amber-200" :
-                                                "bg-slate-50 text-slate-700 border border-slate-200"
-                                            }`}>
+                                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase ${fu.priority === "High" ? "bg-red-50 text-red-700 border border-red-200" :
+                                                    fu.priority === "Medium" ? "bg-amber-50 text-amber-700 border border-amber-200" :
+                                                        "bg-slate-50 text-slate-700 border border-slate-200"
+                                                }`}>
                                                 {fu.priority}
                                             </span>
                                         </div>
@@ -655,10 +662,10 @@ export const SingleLeadPage = () => {
                                 disabled={!selectedRepId || assignMutation.isPending}
                                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition disabled:opacity-50 cursor-pointer"
                             >
-                                {assignMutation.isPending 
-                                    ? "Assigning..." 
-                                    : roleName === "Admin" 
-                                        ? "Assign to Manager" 
+                                {assignMutation.isPending
+                                    ? "Assigning..."
+                                    : roleName === "Admin"
+                                        ? "Assign to Manager"
                                         : "Assign to Representative"}
                             </button>
                         </div>
