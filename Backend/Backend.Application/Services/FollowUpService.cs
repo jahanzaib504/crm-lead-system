@@ -23,15 +23,18 @@ public class FollowUpService : IFollowUpService
     private readonly IFollowUpRepository _followUpRepo;
     private readonly ILeadRepository _leadRepo;
     private readonly IUserManager _userManager;
+    private readonly AuditLogService _auditLogService;
 
     public FollowUpService(
         IFollowUpRepository followUpRepo,
         ILeadRepository leadRepo,
-        IUserManager userManager)
+        IUserManager userManager,
+        AuditLogService auditLogService)
     {
         _followUpRepo = followUpRepo ?? throw new ArgumentNullException(nameof(followUpRepo));
         _leadRepo = leadRepo ?? throw new ArgumentNullException(nameof(leadRepo));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        _auditLogService = auditLogService ?? throw new ArgumentNullException(nameof(auditLogService));
     }
 
     private static FollowUpResponseDto MapToDto(FollowUp f)
@@ -101,6 +104,12 @@ public class FollowUpService : IFollowUpService
         };
 
         var created = await _followUpRepo.AddAsync(followUp);
+        await _auditLogService.LogAsync(
+            "FollowUp",
+            created.Id,
+            "create",
+            dto,
+            currentUserId);
         var fetched = await _followUpRepo.GetByIdAsync(created.Id);
         return MapToDto(fetched ?? created);
     }
@@ -115,11 +124,34 @@ public class FollowUpService : IFollowUpService
         followUp.UpdatedBy = _userManager.GetCurrentUserEmail() ?? "User";
 
         await _followUpRepo.UpdateAsync(followUp);
+        await _auditLogService.LogAsync(
+            "FollowUp",
+            followUp.Id,
+            "update",
+            new { followUp.Status },
+            _userManager.GetCurrentUserId());
         return true;
     }
 
     public async Task<bool> DeleteFollowUp(int id)
     {
-        return await _followUpRepo.DeleteAsync(id);
+        var followUp = await _followUpRepo.GetByIdAsync(id);
+        if (followUp == null)
+        {
+            return false;
+        }
+
+        var deleted = await _followUpRepo.DeleteAsync(id);
+        if (deleted)
+        {
+            await _auditLogService.LogAsync(
+                "FollowUp",
+                followUp.Id,
+                "delete",
+                new { followUp.LeadId, followUp.Title, followUp.Status },
+                _userManager.GetCurrentUserId());
+        }
+
+        return deleted;
     }
 }

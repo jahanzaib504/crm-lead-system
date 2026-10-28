@@ -2,6 +2,7 @@
 
 using Backend.Application.Dtos;
 using Backend.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Backend.Application.Dtos.User;
 namespace Backend.Api.Controllers;
@@ -30,5 +31,13 @@ public class AuthController : ControllerBase
         // 4. RegisterUserAsync returns a Task, so you MUST await it
         var res = await _authService.LoginUserAsync(userData);
         return Ok(res);
+    }
+
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<IActionResult> LogoutUser(CancellationToken cancellationToken)
+    {
+        await _authService.LogoutUserAsync(cancellationToken);
+        return NoContent();
     }
 }

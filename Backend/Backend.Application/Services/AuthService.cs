@@ -12,6 +12,8 @@ public class AuthService
     private readonly IUserRepository _userRepo;
     private readonly TokenService _tokenService;
     private readonly IPasswordHasher<User> _passwordHasher;
+    private readonly AuditLogService _auditLogService;
+    private readonly IUserManager _userManager;
     private UserResponseDto MapToDto(User user)
     {
         return new UserResponseDto
@@ -35,11 +37,18 @@ public class AuthService
             UpdatedBy = user.UpdatedBy
         };
     }
-    public AuthService(IUserRepository userRepo, TokenService tokenService, IPasswordHasher<User> passwordHasher)
+    public AuthService(
+        IUserRepository userRepo,
+        TokenService tokenService,
+        IPasswordHasher<User> passwordHasher,
+        AuditLogService auditLogService,
+        IUserManager userManager)
     {
         _userRepo = userRepo;
         _tokenService = tokenService;
         _passwordHasher = passwordHasher;
+        _auditLogService = auditLogService;
+        _userManager = userManager;
     }
     public async Task<AuthResponseDto> RegisterUserAsync(RegisterUserDto userData)
     {
@@ -69,6 +78,12 @@ public class AuthService
         userToBeStored.PasswordHash = hashedPassword;
 
         var createdUser = await _userRepo.CreateAsync(userToBeStored);
+        await _auditLogService.LogAsync(
+            "User",
+            createdUser.Id,
+            "create",
+            new { createdUser.FullName, createdUser.Email, createdUser.RoleId },
+            createdUser.Id);
 
         // Do not issue JWT token for inactive users; they must wait for admin approval
         return new AuthResponseDto
@@ -93,6 +108,12 @@ public class AuthService
         }
 
         var (token, expiresAt) = _tokenService.CreateToken(user);
+        await _auditLogService.LogAsync(
+            "User",
+            user.Id,
+            "login",
+            new { user.Email },
+            user.Id);
 
         return new AuthResponseDto
         {
@@ -101,7 +122,23 @@ public class AuthService
             ExpiresAt = expiresAt
         };
     }
+
+    public async Task LogoutUserAsync(CancellationToken cancellationToken = default)
+    {
+        var userId = _userManager.GetCurrentUserId();
+        if (!userId.HasValue)
+        {
+            throw new UnauthorizedException("Not authenticated.");
+        }
+
+        var email = _userManager.GetCurrentUserEmail();
+        await _auditLogService.LogAsync(
+            "User",
+            userId.Value,
+            "logout",
+            new { Email = email },
+            userId.Value,
+            cancellationToken);
+    }
 }
-
-
 

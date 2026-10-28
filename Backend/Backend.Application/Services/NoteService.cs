@@ -24,12 +24,18 @@ public class NoteService : INoteService
     private readonly INoteRepository _noteRepository;
     private readonly IUserManager _userManager;
     private readonly ILeadRepository _leadRepository;
+    private readonly AuditLogService _auditLogService;
 
-    public NoteService(INoteRepository noteRepository, IUserManager userManager, ILeadRepository leadRepository)
+    public NoteService(
+        INoteRepository noteRepository,
+        IUserManager userManager,
+        ILeadRepository leadRepository,
+        AuditLogService auditLogService)
     {
         _noteRepository = noteRepository ?? throw new ArgumentNullException(nameof(noteRepository));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         _leadRepository = leadRepository ?? throw new ArgumentNullException(nameof(leadRepository));
+        _auditLogService = auditLogService ?? throw new ArgumentNullException(nameof(auditLogService));
     }
 
     private bool IsAuthorizedForLead(Lead lead)
@@ -109,6 +115,12 @@ public class NoteService : INoteService
         };
 
         var created = await _noteRepository.AddAsync(note);
+        await _auditLogService.LogAsync(
+            "Note",
+            created.Id,
+            "create",
+            dto,
+            _userManager.GetCurrentUserId());
         return created.Adapt<NoteResponseDto>();
     }
 }

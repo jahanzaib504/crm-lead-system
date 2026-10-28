@@ -218,7 +218,7 @@ CREATE TABLE dbo.AuditLogs (
     EntityId INT NOT NULL,
     Action NVARCHAR(20) NOT NULL,
     ChangesJson NVARCHAR(MAX) NULL,
-    PerformedByUserId INT NOT NULL CONSTRAINT FK_AuditLogs_Users FOREIGN KEY REFERENCES dbo.Users(Id),
+    PerformedByUserId INT NULL CONSTRAINT FK_AuditLogs_Users FOREIGN KEY REFERENCES dbo.Users(Id),
     Timestamp DATETIME2 NOT NULL CONSTRAINT DF_AuditLogs_Timestamp DEFAULT SYSUTCDATETIME()
 );
 GO

@@ -10,7 +10,8 @@ namespace Backend.Infrastructure.Repositories;
 
 public class AuditLogRepository: IAuditLogRepository
 {
-    AppDbContext _appDbContext;
+    private readonly AppDbContext _appDbContext;
+
     public AuditLogRepository(AppDbContext appDbContext)
     {
         _appDbContext = appDbContext;
@@ -18,5 +19,12 @@ public class AuditLogRepository: IAuditLogRepository
     public async Task<IEnumerable<AuditLog>> GetAllAsync()
     {
         return await _appDbContext.AuditLogs.ToListAsync();
+    }
+
+    public async Task<AuditLog> AddAsync(AuditLog auditLog, CancellationToken cancellationToken = default)
+    {
+        await _appDbContext.AuditLogs.AddAsync(auditLog, cancellationToken);
+        await _appDbContext.SaveChangesAsync(cancellationToken);
+        return auditLog;
     }
 }

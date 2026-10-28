@@ -25,10 +25,17 @@ namespace Backend.Application.Services
     public class CompanyService : ICompanyService
     {
         private readonly ICompanyRepositry _companyRepository;
+        private readonly AuditLogService _auditLogService;
+        private readonly IUserManager _userManager;
 
-        public CompanyService(ICompanyRepositry companyRepository)
+        public CompanyService(
+            ICompanyRepositry companyRepository,
+            AuditLogService auditLogService,
+            IUserManager userManager)
         {
             _companyRepository = companyRepository;
+            _auditLogService = auditLogService;
+            _userManager = userManager;
         }
 
         public async Task<CompanyResponseDto> GetCompanyByIdAsync(int companyId)
@@ -68,6 +75,12 @@ namespace Backend.Application.Services
         {
             var company = createCompanyDto.Adapt<Company>();
             var createdCompany = await _companyRepository.AddAsync(company);
+            await _auditLogService.LogAsync(
+                "Company",
+                createdCompany.Id,
+                "create",
+                createCompanyDto,
+                _userManager.GetCurrentUserId());
             return createdCompany.Adapt<CompanyResponseDto>();
         }
 
@@ -81,18 +94,35 @@ namespace Backend.Application.Services
 
             updateCompanyDto.Adapt(existingCompany);
             var updatedCompany = await _companyRepository.UpdateAsync(existingCompany);
+            await _auditLogService.LogAsync(
+                "Company",
+                updatedCompany.Id,
+                "update",
+                updateCompanyDto,
+                _userManager.GetCurrentUserId());
             return updatedCompany.Adapt<CompanyResponseDto>();
         }
 
         public async Task<bool> DeleteCompanyAsync(int companyId)
         {
-            var exists = await _companyRepository.ExistsAsync(companyId);
-            if (!exists)
+            var company = await _companyRepository.GetByIdAsync(companyId);
+            if (company == null)
             {
                 throw new NotFoundException($"Company with ID {companyId} not found.");
             }
 
-            return await _companyRepository.DeleteAsync(companyId);
+            var deleted = await _companyRepository.DeleteAsync(companyId);
+            if (deleted)
+            {
+                await _auditLogService.LogAsync(
+                    "Company",
+                    companyId,
+                    "delete",
+                    new { company.Name },
+                    _userManager.GetCurrentUserId());
+            }
+
+            return deleted;
         }
     }
 }

@@ -20,10 +20,10 @@ namespace Backend.Application
             services.AddScoped<IActivityService, ActivityService>();
             services.AddScoped<IAnalyticsService, AnalyticsService>();
             services.AddScoped<IIntelligenceService, IntelligenceService>();
-            services.AddScoped<IAuditLogService, AuditLogService>();
+            services.AddScoped<AuditLogService>();
+            services.AddScoped<IAuditLogService>(serviceProvider => serviceProvider.GetRequiredService<AuditLogService>());
             services.AddScoped<ICompanyService, CompanyService>();
             return services;
         }            
     }
 }
-

@@ -27,6 +27,7 @@ public class UserService : IUserService
 {
     private readonly IUserRepository _userRepo;
     private readonly IUserManager _userManager;
+    private readonly AuditLogService _auditLogService;
 
     private UserResponseDto MapToDto(User user)
     {
@@ -52,10 +53,14 @@ public class UserService : IUserService
         };
     }
     
-    public UserService(IUserRepository userRepo, IUserManager userManager)
+    public UserService(
+        IUserRepository userRepo,
+        IUserManager userManager,
+        AuditLogService auditLogService)
     {
         _userRepo = userRepo ?? throw new ArgumentNullException(nameof(userRepo));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        _auditLogService = auditLogService ?? throw new ArgumentNullException(nameof(auditLogService));
     }
 
 
@@ -98,7 +103,13 @@ public class UserService : IUserService
         user.UpdatedAt = DateTime.UtcNow;
         user.UpdatedBy = _userManager.GetCurrentUserEmail() ?? "Admin";
 
-        await _userRepo.UpdateAsync(user);
+        var updatedUser = await _userRepo.UpdateAsync(user);
+        await _auditLogService.LogAsync(
+            "User",
+            updatedUser.Id,
+            "update",
+            dto,
+            _userManager.GetCurrentUserId());
         return true;
     }
 
@@ -125,7 +136,13 @@ public class UserService : IUserService
         user.UpdatedAt = DateTime.UtcNow;
         user.UpdatedBy = _userManager.GetCurrentUserEmail() ?? "Admin";
 
-        await _userRepo.UpdateAsync(user);
+        var updatedUser = await _userRepo.UpdateAsync(user);
+        await _auditLogService.LogAsync(
+            "User",
+            updatedUser.Id,
+            "update",
+            new { updatedUser.IsActive },
+            currentUserId);
         return true;
     }
 
@@ -154,7 +171,13 @@ public class UserService : IUserService
         user.UpdatedAt = DateTime.UtcNow;
         user.UpdatedBy = _userManager.GetCurrentUserEmail() ?? "Admin";
 
-        await _userRepo.UpdateAsync(user);
+        var updatedUser = await _userRepo.UpdateAsync(user);
+        await _auditLogService.LogAsync(
+            "User",
+            updatedUser.Id,
+            "update",
+            new { updatedUser.IsActive },
+            currentUserId);
         return true;
     }
 

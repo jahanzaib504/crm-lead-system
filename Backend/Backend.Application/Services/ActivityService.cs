@@ -22,15 +22,18 @@ public class ActivityService : IActivityService
     private readonly IActivityRepository _activityRepo;
     private readonly ILeadRepository _leadRepo;
     private readonly IUserManager _userManager;
+    private readonly AuditLogService _auditLogService;
 
     public ActivityService(
         IActivityRepository activityRepo,
         ILeadRepository leadRepo,
-        IUserManager userManager)
+        IUserManager userManager,
+        AuditLogService auditLogService)
     {
         _activityRepo = activityRepo ?? throw new ArgumentNullException(nameof(activityRepo));
         _leadRepo = leadRepo ?? throw new ArgumentNullException(nameof(leadRepo));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        _auditLogService = auditLogService ?? throw new ArgumentNullException(nameof(auditLogService));
     }
 
     private static ActivityResponseDto MapToDto(Activity a)
@@ -96,12 +99,35 @@ public class ActivityService : IActivityService
         };
 
         var created = await _activityRepo.AddAsync(activity);
+        await _auditLogService.LogAsync(
+            "Activity",
+            created.Id,
+            "create",
+            dto,
+            currentUserId);
         var fetched = await _activityRepo.GetByIdAsync(created.Id);
         return MapToDto(fetched ?? created);
     }
 
     public async Task<bool> DeleteActivity(int id)
     {
-        return await _activityRepo.DeleteAsync(id);
+        var activity = await _activityRepo.GetByIdAsync(id);
+        if (activity == null)
+        {
+            return false;
+        }
+
+        var deleted = await _activityRepo.DeleteAsync(id);
+        if (deleted)
+        {
+            await _auditLogService.LogAsync(
+                "Activity",
+                activity.Id,
+                "delete",
+                new { activity.LeadId, activity.ActivityType, activity.Subject },
+                _userManager.GetCurrentUserId());
+        }
+
+        return deleted;
     }
 }

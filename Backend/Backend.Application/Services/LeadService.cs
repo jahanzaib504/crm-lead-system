@@ -34,17 +34,20 @@ public class LeadService : ILeadService
     private readonly IContactRepository _contactRepository;
     private readonly IUserRepository _userRepository;
     private readonly IUserManager _userManager;
+    private readonly AuditLogService _auditLogService;
 
     public LeadService(
         ILeadRepository leadRepository,
         IContactRepository contactRepository,
         IUserRepository userRepository,
-        IUserManager userManager)
+        IUserManager userManager,
+        AuditLogService auditLogService)
     {
         _leadRepository = leadRepository ?? throw new ArgumentNullException(nameof(leadRepository));
         _contactRepository = contactRepository ?? throw new ArgumentNullException(nameof(contactRepository));
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        _auditLogService = auditLogService ?? throw new ArgumentNullException(nameof(auditLogService));
     }
 
     private static LeadResponseDto MapToDto(Lead lead)
@@ -298,6 +301,12 @@ public class LeadService : ILeadService
         };
 
         var createdLead = await _leadRepository.AddAsync(lead);
+        await _auditLogService.LogAsync(
+            "Lead",
+            createdLead.Id,
+            "create",
+            dto,
+            _userManager.GetCurrentUserId());
         var fetched = await _leadRepository.GetByIdAsync(createdLead.Id);
         return MapToDto(fetched ?? createdLead);
     }
@@ -341,6 +350,12 @@ public class LeadService : ILeadService
         };
 
         var created = await _leadRepository.AddAsync(lead);
+        await _auditLogService.LogAsync(
+            "Lead",
+            created.Id,
+            "create",
+            dto,
+            _userManager.GetCurrentUserId());
         var fetched = await _leadRepository.GetByIdAsync(created.Id);
         return MapToDto(fetched ?? created);
     }
@@ -364,7 +379,13 @@ public class LeadService : ILeadService
         existingLead.UpdatedAt = DateTime.UtcNow;
         existingLead.UpdatedBy = _userManager.GetCurrentUserEmail() ?? "User";
 
-        await _leadRepository.UpdateAsync(existingLead);
+        var updatedLead = await _leadRepository.UpdateAsync(existingLead);
+        await _auditLogService.LogAsync(
+            "Lead",
+            updatedLead.Id,
+            "update",
+            dto,
+            _userManager.GetCurrentUserId());
         return true;
     }
 
@@ -380,7 +401,13 @@ public class LeadService : ILeadService
         lead.UpdatedAt = DateTime.UtcNow;
         lead.UpdatedBy = _userManager.GetCurrentUserEmail() ?? "User";
 
-        await _leadRepository.UpdateAsync(lead);
+        var updatedLead = await _leadRepository.UpdateAsync(lead);
+        await _auditLogService.LogAsync(
+            "Lead",
+            updatedLead.Id,
+            "update",
+            new { StageId = stageId },
+            _userManager.GetCurrentUserId());
         return true;
     }
 
@@ -393,7 +420,18 @@ public class LeadService : ILeadService
         if (currentRole != "Admin")
             throw new UnauthorizedException("Only administrators can delete leads.");
 
-        return await _leadRepository.DeleteAsync(id);
+        var deleted = await _leadRepository.DeleteAsync(id);
+        if (deleted)
+        {
+            await _auditLogService.LogAsync(
+                "Lead",
+                existingLead.Id,
+                "delete",
+                new { existingLead.Title, existingLead.ContactId, existingLead.CompanyId, existingLead.LeadStageId },
+                _userManager.GetCurrentUserId());
+        }
+
+        return deleted;
     }
 
     public async Task<bool> AcquireLead(int id)
@@ -419,7 +457,13 @@ public class LeadService : ILeadService
         lead.UpdatedAt = DateTime.UtcNow;
         lead.UpdatedBy = _userManager.GetCurrentUserEmail() ?? (string.Equals(currentRole, "Admin", StringComparison.OrdinalIgnoreCase) ? "Admin" : "Manager");
 
-        await _leadRepository.UpdateAsync(lead);
+        var updatedLead = await _leadRepository.UpdateAsync(lead);
+        await _auditLogService.LogAsync(
+            "Lead",
+            updatedLead.Id,
+            "update",
+            new { lead.ManagerId },
+            currentUserId);
         return true;
     }
 
@@ -481,7 +525,13 @@ public class LeadService : ILeadService
             lead.UpdatedAt = DateTime.UtcNow;
             lead.UpdatedBy = _userManager.GetCurrentUserEmail() ?? "Admin";
 
-            await _leadRepository.UpdateAsync(lead);
+            var updatedLead = await _leadRepository.UpdateAsync(lead);
+            await _auditLogService.LogAsync(
+                "Lead",
+                updatedLead.Id,
+                "update",
+                new { lead.ManagerId, lead.AssignedToUserId },
+                currentUserId);
             return true;
         }
 
@@ -512,7 +562,13 @@ public class LeadService : ILeadService
             lead.UpdatedAt = DateTime.UtcNow;
             lead.UpdatedBy = _userManager.GetCurrentUserEmail() ?? "Manager";
 
-            await _leadRepository.UpdateAsync(lead);
+            var updatedLead = await _leadRepository.UpdateAsync(lead);
+            await _auditLogService.LogAsync(
+                "Lead",
+                updatedLead.Id,
+                "update",
+                new { lead.ManagerId, lead.AssignedToUserId },
+                currentUserId);
             return true;
         }
 

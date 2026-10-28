@@ -33,9 +33,7 @@ function App() {
         const user = await getMe();
         setUserStore(user);
       } catch (e: any) {
-        console.error("Session expired or invalid:", e);
-        localStorage.removeItem("token");
-        setUserStore(null);
+        console.error("Error fetching user:", e);
       } finally {
         setLoading(false);
       }
