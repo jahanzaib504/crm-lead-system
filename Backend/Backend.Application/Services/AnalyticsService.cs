@@ -60,7 +60,7 @@ public class AnalyticsService : IAnalyticsService
                 : 0;
 
             response.TotalUsers = allUsers.Count;
-            response.PendingApprovals = allUsers.Count(u => !u.IsActive);
+            response.PendingApprovals = allUsers.Count(u => !u.RoleId.HasValue); // Users without a role are considered pending approval
 
             response.StageBreakdown = allLeads
                 .GroupBy(l => l.LeadStage?.Name ?? "Stage " + l.LeadStageId)

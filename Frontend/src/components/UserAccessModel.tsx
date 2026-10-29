@@ -3,12 +3,13 @@ import { useState } from "react";
 import { approveUser, getManagers } from "../services/userService";
 import toast from "react-hot-toast";
 import { X } from "lucide-react";
+import type { User } from "../types/User";
 
-export const UserAccessModal = ({selectedUser, setSelectedUser}: {selectedUser: any, setSelectedUser: any}) => {
+export const UserAccessModal = ({selectedUser, setSelectedUser}: {selectedUser: User, setSelectedUser: any}) => {
     const queryClient = useQueryClient();
-    const [roleId, setRoleId] = useState<number>(selectedUser.roleId ?? 3);
-    const [managerId, setManagerId] = useState<number | null>(selectedUser.managerId ?? null);
-    const [isActive, setIsActive] = useState<boolean>(selectedUser.isActive);
+    const [roleId, setRoleId] = useState<number>(selectedUser.roleId ?? 3); // Default to Sales Rep if roleId is null
+    const [managerId, setManagerId] = useState<number | null>(null);
+    const [isActive, setIsActive] = useState<boolean>(false);
             
 
     const { data: managers } = useQuery({
@@ -23,9 +24,9 @@ export const UserAccessModal = ({selectedUser, setSelectedUser}: {selectedUser: 
             approveUser(id, { roleId, managerId, isActive }),
         onSuccess: () => {
             toast.success("User access updated successfully!");
-            queryClient.invalidateQueries({ queryKey: ["admin-pending-users"] });
             queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
+            queryClient.invalidateQueries({ queryKey: ["admin-pending-users"] });
             setSelectedUser(null);
         },
         onError: (err: any) => {
@@ -48,7 +49,7 @@ export const UserAccessModal = ({selectedUser, setSelectedUser}: {selectedUser: 
             <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100">
                 <div className="flex items-center justify-between pb-4 border-b border-gray-100">
                     <h3 className="text-base font-bold text-gray-900">
-                        {selectedUser.isActive ? "Edit User Permissions" : "Approve User Access"}
+                        {selectedUser.roleId !== null ? "Edit User Permissions" : "Approve User Access"}
                     </h3>
                     <button onClick={() => setSelectedUser(null)} className="text-gray-400 hover:text-gray-600">
                         <X className="w-5 h-5" />
@@ -64,7 +65,7 @@ export const UserAccessModal = ({selectedUser, setSelectedUser}: {selectedUser: 
                         <p className="text-xs text-gray-500">{selectedUser.email}</p>
                     </div>
 
-                    <div>
+                    {selectedUser.roleId == null && <div>
                         <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
                             Role *
                         </label>
@@ -75,9 +76,8 @@ export const UserAccessModal = ({selectedUser, setSelectedUser}: {selectedUser: 
                         >
                             <option value={3}>Sales Representative</option>
                             <option value={2}>Sales Manager</option>
-                            <option value={1}>System Administrator</option>
                         </select>
-                    </div>
+                    </div>}
 
                     {Number(roleId) === 3 && (
                         <div>

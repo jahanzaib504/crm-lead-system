@@ -18,19 +18,11 @@ public class UserController : ControllerBase
         _userService = userService;
     }
 
-    [HttpPost("approve/{id}")]
+    [HttpPost("approve/{id}")] // This endpoint is used to approve a user by their ID. It only works for first sign up
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<bool>> ApproveUser(int id, [FromBody] ApproveUserDto dto)
     {
         var result = await _userService.ApproveUser(id, dto);
-        return Ok(result);
-    }
-
-    [HttpPut("{id}/access")]
-    [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<bool>> UpdateUserAccess(int id, [FromBody] ApproveUserDto dto)
-    {
-        var result = await _userService.UpdateUserAccess(id, dto);
         return Ok(result);
     }
 

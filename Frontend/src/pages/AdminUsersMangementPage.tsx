@@ -23,7 +23,7 @@ export const AdminUsersManagementPage = () => {
     const [searchTerm, setSearchTerm] = useState(""); // Allows searching across records
 
     const [selectedUser, setSelectedUser] = useState<any>(null);
-
+    const [loadingId, setLoadingId] = useState<number | null>(null);
 
     // Queries
     const { data: pendingUsers, isPending: pendingLoading } = useQuery({
@@ -43,6 +43,7 @@ export const AdminUsersManagementPage = () => {
     const revokeMutation = useMutation({
         mutationFn: (id: number) => revokeAccess(id),
         onSuccess: () => {
+            setLoadingId(null);
             toast.success("User access revoked.");
             queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
@@ -52,6 +53,7 @@ export const AdminUsersManagementPage = () => {
     const grantMutation = useMutation({ // Revoking user access will change pending users in dashboard
         mutationFn: (id: number) => grantAccess(id),
         onSuccess: () => {
+            setLoadingId(null);
             toast.success("User access granted.");
             queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
@@ -219,29 +221,43 @@ export const AdminUsersManagementPage = () => {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-right space-x-2">
-                                                <button
-                                                    onClick={() => setSelectedUser(u)}
-                                                    className="px-2.5 py-1 text-xs font-semibold rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
-                                                >
-                                                    Edit Access
-                                                </button>
+                                               
                                                 {u.id !== currentUser?.id && (
                                                     u.isActive ? (
                                                         <button
-                                                            onClick={() => revokeMutation.mutate(u.id)}
-                                                            className="px-2.5 py-1 text-xs font-semibold rounded-md border border-red-200 text-red-600 hover:bg-red-50 transition"
+                                                            disabled={loadingId === u.id}
+                                                            onClick={() => {
+                                                                setLoadingId(u.id);
+                                                                revokeMutation.mutate(u.id);
+                                                            }}
+                                                            className="hover:cursor-pointer px-2.5 py-1 text-xs font-semibold rounded-md border border-red-200 text-red-600 hover:bg-red-50 transition"
                                                         >
-                                                            Deactivate
+                                                            {(loadingId === u.id) ? "Deactivating..." : "Deactivate"}
                                                         </button>
                                                     ) : (
                                                         <button
-                                                            onClick={() => grantMutation.mutate(u.id)}
-                                                            className="px-2.5 py-1 text-xs font-semibold rounded-md border border-emerald-200 text-emerald-600 hover:bg-emerald-50 transition"
+                                                            disabled={loadingId === u.id}
+                                                            onClick={() => {
+                                                                setLoadingId(u.id);
+                                                                grantMutation.mutate(u.id);
+                                                            }}
+                                                            className="hover:cursor-pointer px-2.5 py-1 text-xs font-semibold rounded-md border border-emerald-200 text-emerald-600 hover:bg-emerald-50 transition"
                                                         >
-                                                            Activate
+                                                            {(loadingId === u.id) ? "Activating..." : "Activate"}
                                                         </button>
                                                     )
                                                 )}
+                                                {u.id!=currentUser?.id && u.managerId == null && 
+                                                    <button 
+                                                        onClick={() => {
+                                                            setSelectedUser(u);
+                                                            console.log("Selected user for editing access:", u);
+                                                        }}
+                                                        className="hover:cursor-pointer px-2.5 py-1 text-xs font-semibold rounded-md border border-blue-200 text-blue-600 hover:bg-blue-50 transition"
+                                                    >
+                                                    Edit Access
+                                                </button>}
+                                                
                                             </td>
                                         </tr>
                                     ))}

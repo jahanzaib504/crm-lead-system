@@ -72,3 +72,7 @@ export const updateLead = async (id: number, payload: Partial<Lead>): Promise<bo
 export const deleteLead = async (id: number): Promise<boolean> => {
     return (await api.delete(`/leads/${id}`)).data;
 };
+
+export const withdrawLead = async (id: number): Promise<boolean> => {
+    return (await api.post(`/leads/${id}/withdraw`)).data;
+}

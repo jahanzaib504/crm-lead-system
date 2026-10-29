@@ -36,9 +36,9 @@ public class UserService : IUserService
             Id = user.Id,
             FullName = user.FullName,
             Email = user.Email,
-            RoleId = user.RoleId,
+            RoleId = user.RoleId.HasValue ? user.RoleId.Value : null,
 
-            Role = new RoleDto { Id =  user.Role.Id , Name = user.Role.Name},
+            Role = user.RoleId.HasValue ? new RoleDto { Id = user.Role.Id, Name = user.Role.Name } : null,
 
             ManagerId = user.ManagerId,
             ManagerName = user.Manager?.FullName,
@@ -78,6 +78,10 @@ public class UserService : IUserService
             throw new NotFoundException("User does not exist.");
         }
 
+        if(user.RoleId.HasValue && user.RoleId.Value != dto.RoleId) 
+        {
+            throw new ConflictException("Cannot reassign role to an already assigned user.");
+        }
         // Validate manager if provided
         if (dto.ManagerId.HasValue)
         {
@@ -94,8 +98,6 @@ public class UserService : IUserService
             user.ManagerId = _userManager.GetCurrentUserId() ?? null;
         else if (dto.RoleId == 3 && dto.ManagerId.HasValue) // 
             user.ManagerId = dto.ManagerId;
-        else if (dto.RoleId == 3) // No manager provided
-            throw new ConflictException("Sales Repceptionists must have a manager");
         else
             user.ManagerId = null; // If the user is admin than he cannot have a manager
 
@@ -126,6 +128,11 @@ public class UserService : IUserService
             throw new UnauthorizedException("Current user is not authenticated.");
         }
 
+        if(currentUserId == id)
+        {
+            throw new ConflictException("You cannot grant access to yourself.");
+        }
+
         var user = await _userRepo.GetByIdAsync(id);
         if (user == null)
         {
@@ -153,6 +160,11 @@ public class UserService : IUserService
         if (!currentUserId.HasValue)
         {
             throw new UnauthorizedException("Current user is not authenticated.");
+        }
+
+        if(currentUserId == id)
+        {
+            throw new ConflictException("You cannot revoke access to yourself.");
         }
 
         var user = await _userRepo.GetByIdAsync(id);
@@ -220,14 +232,14 @@ public class UserService : IUserService
     public async Task<IEnumerable<UserResponseDto>> GetPendingUsers()
     {
         var users = await _userRepo.GetAllAsync();
-        return users.Where(u => !u.IsActive).Select(MapToDto);
+        return users.Where(u => !u.RoleId.HasValue).Select(MapToDto); // Get all non-approved users (users without a role)
     }
 
     public async Task<IEnumerable<UserResponseDto>> GetManagers()
     {
         var users = await _userRepo.GetAllAsync();
         // Return active Sales Managers (role 2)
-        return users.Where(u => u.IsActive && u.RoleId == 2).Select(MapToDto);
+        return users.Where(u => u.RoleId == 2).Select(MapToDto);
     }
 
     public async Task<IEnumerable<UserResponseDto>> GetSalesReps()
@@ -238,10 +250,10 @@ public class UserService : IUserService
 
         if (string.Equals(currentRole, "Sales Manager", StringComparison.OrdinalIgnoreCase))
         {
-            return users.Where(u => u.IsActive && u.RoleId == 3 && u.ManagerId == currentUserId).Select(MapToDto);
+            return users.Where(u => u.RoleId == 3 && u.ManagerId == currentUserId).Select(MapToDto);
         }
 
-        // Admin can see all active sales reps
-        return users.Where(u => u.IsActive && u.RoleId == 3).Select(MapToDto);
+       
+        return users.Where(u => u.RoleId == 3).Select(MapToDto);
     }
 }

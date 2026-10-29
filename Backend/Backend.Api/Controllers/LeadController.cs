@@ -72,6 +72,14 @@ public class LeadController : ControllerBase
         return Ok(res);
     }
 
+    [HttpPost("{id}/withdraw")]
+    [Authorize(Roles = "Admin,Sales Manager")]
+    public async Task<ActionResult<bool>> WithdrawLead(int id)
+    {
+        var res = await _leadService.WithdrawLead(id);
+        return Ok(res);
+    }
+
     [HttpPost("{id}/assign")]
     [Authorize(Roles = "Admin,Sales Manager")]
     public async Task<ActionResult<bool>> AssignLead(int id, [FromBody] AssignLeadDto dto)

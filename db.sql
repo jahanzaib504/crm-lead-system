@@ -339,6 +339,9 @@ VALUES
 (4, 88.00, 'High', '{"activityCount": 1, "companySize": 500, "stage": "Proposal"}', '{"factors": ["Stage Weight (+75.00)", "Company Size >200 (+10.00)", "Activity Logged (+3.00)"]}', 1, 95.00, 'Manager confirmed budget approval off-line', 2);
 GO
 
+-- Constraints Removal
+alter table users alter column RoleId int null;
+
 -- ============================================================================
 -- VERIFICATION QUERY
 -- ============================================================================

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useParams, Link } from "react-router";
-import { getLead, updateLeadStage, assignLead, acquireLead } from "../services/leadService";
+import { useParams, Link, useNavigate } from "react-router";
+import { getLead, updateLeadStage, assignLead, acquireLead, deleteLead, withdrawLead } from "../services/leadService";
 import { getNotesForLead, createNote } from "../services/noteService";
 import { getFollowUpsByLead, createFollowUp, updateFollowUpStatus } from "../services/followUpService";
 import { getActivitiesByLead, createActivity } from "../services/activityService";
@@ -27,9 +27,12 @@ import {
     X,
     UserPlus,
     Loader,
-    LoaderCircle
+    LoaderCircle,
+    Trash
 } from "lucide-react";
 import { getCurrentDate, getCurrentDateTime } from "../utils/timeManagement";
+import { DeleteModal } from "../components/DeleteModal";
+import { WithdrawModal } from "../components/WithdrawModel";
 
 const STAGES = [
     { id: 1, name: "New", color: "bg-blue-50 text-blue-700 border-blue-200" },
@@ -46,12 +49,14 @@ export const SingleLeadPage = () => {
     const queryClient = useQueryClient();
     const currentUser = useUser((state) => state.user);
     const roleName = currentUser?.role?.name;
-
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<"notes" | "followups" | "activities">("notes");
 
     // Modal States
     const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
     const [selectedRepId, setSelectedRepId] = useState<number | "">("");
+
+    const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
     const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
     const [followUpForm, setFollowUpForm] = useState({ title: "", dueDate: "", priority: "Medium" });
@@ -61,6 +66,52 @@ export const SingleLeadPage = () => {
 
     const [noteContent, setNoteContent] = useState("");
     const [updatingStage, setUpdatingStage] = useState<number | null>(null);
+
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+    const handleDeleteLead = async() => {
+        // Implement the delete lead functionality here
+        // For example, you might call a deleteLead API function and then invalidate queries
+        try{
+            await deleteLead(leadId); // Assuming deleteLead is an API function you've defined
+            toast.success("Lead deleted successfully!");
+            queryClient.invalidateQueries({ queryKey: ["leads"] });
+            navigate("/leads"); // Redirect to leads overview after deletion
+        }
+        catch (error) {
+            toast.error("Failed to delete lead.");
+            return;
+        }
+        finally {
+            setIsDeleteModalOpen(false);
+        }
+    };
+    
+    const handleWithdrawLead = async() => {
+        // Implement the withdraw lead functionality here
+        try{
+            await withdrawLead(leadId); // Assuming withdrawLead is the API function to withdraw the lead
+            toast.success("Lead withdrawn successfully!");
+            queryClient.invalidateQueries({ queryKey: ["lead", leadId] });
+            queryClient.invalidateQueries({ queryKey: ["leads"] });
+            queryClient.invalidateQueries({ queryKey: ["open-pool-leads"] });
+            queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
+        }
+        catch (error) {
+            toast.error("Failed to withdraw lead.");
+            return;
+        }
+        finally {
+            setIsWithdrawModalOpen(false);
+        }
+    };
+
+    const onCloseDeleteModal = () => {
+        setIsDeleteModalOpen(false);
+    }
+    const onCloseWithdrawModal = () => {
+        setIsWithdrawModalOpen(false);
+    }
     // Queries
     const { data: lead, isPending: leadLoading, isError: leadError } = useQuery({
         queryKey: ["lead", leadId],
@@ -231,6 +282,11 @@ export const SingleLeadPage = () => {
                     )}
 
                     {roleName === "Admin" && (
+                        <div className="flex items-center gap-2">
+                        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow-xs transition cursor-pointer" onClick={() => setIsDeleteModalOpen(true)}>
+                            <Trash className="w-3.5 h-3.5" />
+                            Delete
+                        </button>
                         <button
                             onClick={() => {
                                 setSelectedRepId(lead.managerId || "");
@@ -241,6 +297,27 @@ export const SingleLeadPage = () => {
                             <UserPlus className="w-3.5 h-3.5" />
                             {lead.managerId ? "Reassign Manager" : "Assign to Manager"}
                         </button>
+                        {isDeleteModalOpen && (
+                            <DeleteModal
+                                label="lead"
+                                isOpen={isDeleteModalOpen}
+                                onClose={onCloseDeleteModal}
+                                onDelete={handleDeleteLead}
+                            />
+                        )}
+                        </div>
+                    )}
+
+                    {roleName === "Sales Manager" || roleName === "Admin" && currentUser?.id === lead.managerId && (
+                        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-semibold shadow-xs transition cursor-pointer" onClick={() => setIsWithdrawModalOpen(true)}>
+                            Withdraw from Lead
+                        </button>
+                    )}
+                    {isWithdrawModalOpen && (
+                        <WithdrawModal
+                            onClose={onCloseWithdrawModal}
+                            onWithdraw={handleWithdrawLead}
+                        />
                     )}
 
                     {roleName === "Sales Manager" && lead.managerId === currentUser?.id && (

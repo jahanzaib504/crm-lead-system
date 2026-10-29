@@ -6,8 +6,8 @@ export interface User{
     id: number,
     fullName: string,
     email: string,
-    role: Role,
-    roleId: number,
+    role?: Role,
+    roleId?: number,
     managerId: number | null,
     managerName?: string | null,
     isActive: boolean

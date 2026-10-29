@@ -13,8 +13,8 @@ public class UserResponseDto
     public int Id { get; set; }
     public string FullName { get; set; } = null!;
     public string Email { get; set; } = null!;
-    public int RoleId { get; set; }
-    public RoleDto Role { get; set; } = null!;
+    public int? RoleId { get; set; }
+    public RoleDto? Role { get; set; } = null!;
     public int? ManagerId { get; set; }
     public string? ManagerName { get; set; }
     public bool IsActive { get; set; }

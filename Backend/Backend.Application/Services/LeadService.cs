@@ -24,6 +24,7 @@ public interface ILeadService
     Task<bool> UpdateStageAsync(int id, int stageId);
     Task<bool> DeleteAsync(int id);
     Task<bool> AcquireLead(int id);
+    Task<bool> WithdrawLead(int id);
     Task<bool> AssignLead(int id, int salesRepId);
     Task<bool> AssignLead(int id, AssignLeadDto dto);
 }
@@ -463,6 +464,45 @@ public class LeadService : ILeadService
             updatedLead.Id,
             "update",
             new { lead.ManagerId },
+            currentUserId);
+        return true;
+    }
+
+    public async Task<bool> WithdrawLead(int id)
+    {
+        var currentRole = _userManager.GetCurrentUserRole();
+        var currentUserId = _userManager.GetCurrentUserId();
+
+        if (string.IsNullOrEmpty(currentRole) || !currentUserId.HasValue)
+            throw new UnauthorizedException("User is not authenticated.");
+
+        if (!string.Equals(currentRole, "Sales Manager", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(currentRole, "Admin", StringComparison.OrdinalIgnoreCase))
+            throw new UnauthorizedException("Only Sales Managers and Admins can withdraw leads.");
+
+        var lead = await _leadRepository.GetByIdAsync(id);
+        if (lead == null)
+            throw new NotFoundException("Lead not found.");
+
+        if (lead.ManagerId == null)
+            throw new ConflictException("Lead is not currently assigned to a Sales Manager.");
+
+        if (string.Equals(currentRole, "Sales Manager", StringComparison.OrdinalIgnoreCase) &&
+            lead.ManagerId != currentUserId.Value)
+            throw new UnauthorizedException("You can only withdraw leads assigned to your team.");
+
+        var previousManagerId = lead.ManagerId;
+        lead.ManagerId = null;
+        lead.UpdatedAt = DateTime.UtcNow;
+        lead.UpdatedBy = _userManager.GetCurrentUserEmail() ??
+            (string.Equals(currentRole, "Admin", StringComparison.OrdinalIgnoreCase) ? "Admin" : "Manager");
+
+        var updatedLead = await _leadRepository.UpdateAsync(lead);
+        await _auditLogService.LogAsync(
+            "Lead",
+            updatedLead.Id,
+            "update",
+            new { PreviousManagerId = previousManagerId, lead.ManagerId },
             currentUserId);
         return true;
     }
