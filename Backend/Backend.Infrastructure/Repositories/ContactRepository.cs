@@ -73,20 +73,28 @@ public class ContactRepository : IContactRepository
 
     public async Task<Contact> UpdateAsync(Contact contact)
     {
-        _context.Contacts.Update(contact);
+        var existingContact = await _context.Contacts
+            .FirstOrDefaultAsync(c => c.Id == contact.Id);
+        if (existingContact == null)
+        {
+            throw new KeyNotFoundException($"Contact with ID {contact.Id} was not found.");
+        }
+
+        _context.Entry(existingContact).CurrentValues.SetValues(contact);
+        existingContact.IsDeleted = false;
         await _context.SaveChangesAsync();
-        return contact;
+        return existingContact;
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var contact = await _context.Contacts.FindAsync(id);
+        var contact = await _context.Contacts.FirstOrDefaultAsync(c => c.Id == id);
         if (contact == null)
         {
             return false;
         }
 
-        _context.Contacts.Remove(contact);
+        contact.IsDeleted = true;
         await _context.SaveChangesAsync();
         return true;
     }

@@ -63,9 +63,9 @@ public class ActivityRepository : IActivityRepository
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var item = await _context.Activities.FindAsync(id);
+        var item = await _context.Activities.FirstOrDefaultAsync(a => a.Id == id);
         if (item == null) return false;
-        _context.Activities.Remove(item);
+        item.IsDeleted = true;
         await _context.SaveChangesAsync();
         return true;
     }

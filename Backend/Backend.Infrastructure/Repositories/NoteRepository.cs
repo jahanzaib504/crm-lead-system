@@ -73,21 +73,29 @@ public class NoteRepository : INoteRepository
     {
         if (note == null) throw new ArgumentNullException(nameof(note));
 
-        _context.Notes.Update(note);
+        var existingNote = await _context.Notes
+            .FirstOrDefaultAsync(n => n.Id == note.Id);
+        if (existingNote == null)
+        {
+            throw new KeyNotFoundException($"Note with ID {note.Id} was not found.");
+        }
+
+        _context.Entry(existingNote).CurrentValues.SetValues(note);
+        existingNote.IsDeleted = false;
         await _context.SaveChangesAsync();
 
-        return note;
+        return existingNote;
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var note = await _context.Notes.FindAsync(id);
+        var note = await _context.Notes.FirstOrDefaultAsync(n => n.Id == id);
         if (note == null)
         {
             return false;
         }
 
-        _context.Notes.Remove(note);
+        note.IsDeleted = true;
         await _context.SaveChangesAsync();
 
         return true;

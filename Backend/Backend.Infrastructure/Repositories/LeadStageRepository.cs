@@ -40,9 +40,17 @@ namespace Backend.Infrastructure.Repositories
         // Update an existing entity
         public async Task<LeadStage> UpdateAsync(LeadStage leadStage)
         {
-            _context.LeadStages.Update(leadStage);
+            var existingLeadStage = await _context.LeadStages
+                .FirstOrDefaultAsync(ls => ls.Id == leadStage.Id);
+            if (existingLeadStage == null)
+            {
+                throw new KeyNotFoundException($"Lead stage with ID {leadStage.Id} was not found.");
+            }
+
+            _context.Entry(existingLeadStage).CurrentValues.SetValues(leadStage);
+            existingLeadStage.IsDeleted = false;
             await _context.SaveChangesAsync();
-            return leadStage;
+            return existingLeadStage;
         }
 
         // Delete an entity by ID
@@ -54,7 +62,7 @@ namespace Backend.Infrastructure.Repositories
                 return false;
             }
 
-            _context.LeadStages.Remove(entity);
+            entity.IsDeleted = true;
             await _context.SaveChangesAsync();
             return true;
         }

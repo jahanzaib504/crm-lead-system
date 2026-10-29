@@ -62,20 +62,28 @@ namespace Backend.Infrastructure.Repositories
 
         public async Task<Company> UpdateAsync(Company company)
         {
-            _context.Companies.Update(company);
+            var existingCompany = await _context.Companies
+                .FirstOrDefaultAsync(c => c.Id == company.Id);
+            if (existingCompany == null)
+            {
+                throw new KeyNotFoundException($"Company with ID {company.Id} was not found.");
+            }
+
+            _context.Entry(existingCompany).CurrentValues.SetValues(company);
+            existingCompany.IsDeleted = false;
             await _context.SaveChangesAsync();
-            return company;
+            return existingCompany;
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var company = await _context.Companies.FindAsync(id);
+            var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id == id);
             if (company == null)
             {
                 return false;
             }
 
-            _context.Companies.Remove(company);
+            company.IsDeleted = true;
             await _context.SaveChangesAsync();
             return true;
         }

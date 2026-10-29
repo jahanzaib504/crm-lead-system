@@ -46,6 +46,7 @@ public partial class AppDbContext : DbContext
     {
         modelBuilder.Entity<Activity>(entity =>
         {
+            entity.HasQueryFilter(e => !e.IsDeleted);
             entity.HasIndex(e => new { e.LeadId, e.ActivityDate }, "IX_Activities_LeadDate").HasFilter("([IsDeleted]=(0))");
 
             entity.Property(e => e.ActivityType).HasMaxLength(30);
@@ -82,6 +83,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Company>(entity =>
         {
+            entity.HasQueryFilter(e => !e.IsDeleted);
             entity.HasIndex(e => e.Name, "UX_Companies_Name")
                 .IsUnique()
                 .HasFilter("([IsDeleted]=(0))");
@@ -101,6 +103,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Contact>(entity =>
         {
+            entity.HasQueryFilter(e => !e.IsDeleted);
             entity.HasIndex(e => e.Email, "UX_Contacts_Email")
                 .IsUnique()
                 .HasFilter("([IsDeleted]=(0))");
@@ -124,6 +127,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<FollowUp>(entity =>
         {
+            entity.HasQueryFilter(e => !e.IsDeleted);
             entity.HasIndex(e => new { e.AssignedToUserId, e.Status, e.DueDate }, "IX_FollowUps_AssignedStatus").HasFilter("([IsDeleted]=(0))");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_FollowUps_CreatedAt");
@@ -153,6 +157,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Lead>(entity =>
         {
+            entity.HasQueryFilter(e => !e.IsDeleted);
             entity.HasIndex(e => new { e.AssignedToUserId, e.LeadStageId }, "IX_Leads_AssignedStage").HasFilter("([IsDeleted]=(0))");
 
             entity.HasIndex(e => e.Title, "IX_Leads_Title").HasFilter("([IsDeleted]=(0))");
@@ -213,6 +218,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<LeadStage>(entity =>
         {
+            entity.HasQueryFilter(e => !e.IsDeleted);
             entity.HasIndex(e => e.Name, "UX_LeadStages_Name")
                 .IsUnique()
                 .HasFilter("([IsDeleted]=(0))");
@@ -229,6 +235,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Note>(entity =>
         {
+            entity.HasQueryFilter(e => !e.IsDeleted);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())", "DF_Notes_CreatedAt");
             entity.Property(e => e.CreatedBy)
                 .HasMaxLength(100)
@@ -250,6 +257,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
+            entity.HasQueryFilter(e => !e.IsDeleted);
             entity.HasIndex(e => e.Email, "UX_Users_Email")
                 .IsUnique()
                 .HasFilter("([IsDeleted]=(0))");

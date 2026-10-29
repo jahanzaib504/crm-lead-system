@@ -83,21 +83,29 @@ namespace Backend.Infrastructure.Repositories
         {
             if (lead == null) throw new ArgumentNullException(nameof(lead));
 
-            _context.Leads.Update(lead);
+            var existingLead = await _context.Leads
+                .FirstOrDefaultAsync(l => l.Id == lead.Id);
+            if (existingLead == null)
+            {
+                throw new KeyNotFoundException($"Lead with ID {lead.Id} was not found.");
+            }
+
+            _context.Entry(existingLead).CurrentValues.SetValues(lead);
+            existingLead.IsDeleted = false;
             await _context.SaveChangesAsync();
-            return lead;
+            return existingLead;
         }
 
         // Delete a Lead by ID
         public async Task<bool> DeleteAsync(int id)
         {
-            var lead = await _context.Leads.FindAsync(id);
+            var lead = await _context.Leads.FirstOrDefaultAsync(l => l.Id == id);
             if (lead == null)
             {
                 return false;
             }
 
-            _context.Leads.Remove(lead);
+            lead.IsDeleted = true;
             await _context.SaveChangesAsync();
             return true;
         }

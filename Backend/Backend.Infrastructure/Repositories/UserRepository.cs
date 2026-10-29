@@ -35,21 +35,31 @@ namespace Backend.Infrastructure.Repositories
 
         public async Task<User> UpdateAsync(User user)
         {
-            _context.Users.Update(user);
+            var existingUser = await _context.Users
+                .Include(u => u.Role)
+                .Include(u => u.Manager)
+                .SingleOrDefaultAsync(u => u.Id == user.Id);
+            if (existingUser == null)
+            {
+                throw new KeyNotFoundException($"User with ID {user.Id} was not found.");
+            }
+
+            _context.Entry(existingUser).CurrentValues.SetValues(user);
+            existingUser.IsDeleted = false;
             await _context.SaveChangesAsync();
-            
-            return await _context.Users.Include(u => u.Role).Include(u => u.Manager).SingleAsync(u => u.Id == user.Id);
+
+            return existingUser;
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
             {
                 return false;
             }
 
-            _context.Users.Remove(user);
+            user.IsDeleted = true;
             await _context.SaveChangesAsync();
             return true;
         }

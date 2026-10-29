@@ -63,16 +63,24 @@ public class FollowUpRepository : IFollowUpRepository
 
     public async Task<FollowUp> UpdateAsync(FollowUp followUp)
     {
-        _context.FollowUps.Update(followUp);
+        var existingFollowUp = await _context.FollowUps
+            .FirstOrDefaultAsync(f => f.Id == followUp.Id);
+        if (existingFollowUp == null)
+        {
+            throw new KeyNotFoundException($"Follow-up with ID {followUp.Id} was not found.");
+        }
+
+        _context.Entry(existingFollowUp).CurrentValues.SetValues(followUp);
+        existingFollowUp.IsDeleted = false;
         await _context.SaveChangesAsync();
-        return followUp;
+        return existingFollowUp;
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var item = await _context.FollowUps.FindAsync(id);
+        var item = await _context.FollowUps.FirstOrDefaultAsync(f => f.Id == id);
         if (item == null) return false;
-        _context.FollowUps.Remove(item);
+        item.IsDeleted = true;
         await _context.SaveChangesAsync();
         return true;
     }
