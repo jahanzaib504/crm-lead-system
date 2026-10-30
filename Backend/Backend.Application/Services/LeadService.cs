@@ -523,12 +523,13 @@ public class LeadService : ILeadService
         {
             throw new UnauthorizedException("User is not authenticated.");
         }
-
+        
         var lead = await _leadRepository.GetByIdAsync(id);
         if (lead == null)
         {
             throw new NotFoundException("Lead not found.");
         }
+        
 
         int targetUserId = dto.ManagerId ?? dto.UserId ?? dto.SalesRepId ?? 0;
         if (targetUserId <= 0)

@@ -308,7 +308,7 @@ export const SingleLeadPage = () => {
                         </div>
                     )}
 
-                    {roleName === "Sales Manager" || roleName === "Admin" && currentUser?.id === lead.managerId && (
+                    {(roleName === "Sales Manager" || roleName === "Admin") && currentUser?.id === lead.managerId && (
                         <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-semibold shadow-xs transition cursor-pointer" onClick={() => setIsWithdrawModalOpen(true)}>
                             Withdraw from Lead
                         </button>
@@ -703,7 +703,7 @@ export const SingleLeadPage = () => {
                                         onChange={(e) => setSelectedRepId(Number(e.target.value))}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-blue-500"
                                     >
-                                        <option value="">-- Choose Sales Manager --</option>
+                                        
                                         {managers?.map((mgr) => (
                                             <option key={mgr.id} value={mgr.id}>
                                                 {mgr.fullName} ({mgr.email})
@@ -716,7 +716,7 @@ export const SingleLeadPage = () => {
                                         onChange={(e) => setSelectedRepId(Number(e.target.value))}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-blue-500"
                                     >
-                                        <option value="">-- Choose Sales Rep --</option>
+                                        
                                         {salesReps?.map((rep) => (
                                             <option key={rep.id} value={rep.id}>
                                                 {rep.fullName} ({rep.email})

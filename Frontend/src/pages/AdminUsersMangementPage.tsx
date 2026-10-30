@@ -247,7 +247,7 @@ export const AdminUsersManagementPage = () => {
                                                         </button>
                                                     )
                                                 )}
-                                                {u.id!=currentUser?.id && u.managerId == null && 
+                                                {u.id!=currentUser?.id  && 
                                                     <button 
                                                         onClick={() => {
                                                             setSelectedUser(u);

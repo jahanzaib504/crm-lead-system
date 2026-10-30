@@ -443,6 +443,7 @@ export const Dashboard = () => {
                                 <thead className="bg-gray-50">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Representative</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Assigned Leads</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pipeline Value</th>
                                     </tr>
@@ -451,8 +452,14 @@ export const Dashboard = () => {
                                     {analytics.repPerformance.map((rep) => (
                                         <tr key={rep.repId} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 font-medium text-gray-900">{rep.repName}</td>
+                                            <td>
+                                                <span className={rep.status ? "px-2 py-1 bg-green-200 text-green-800 rounded-xl" : "px-2 py-1 bg-red-200 text-red-800 rounded-xl"}>
+                                                    {rep.status ? "Active" : "Inactive"}
+                                                </span>
+                                            </td>
                                             <td className="px-6 py-4 text-gray-700 font-semibold">{rep.leadCount}</td>
                                             <td className="px-6 py-4 text-emerald-600 font-semibold">Rs. {(rep.totalValue ?? 0).toLocaleString()}</td>
+                                            
                                         </tr>
                                     ))}
                                 </tbody>

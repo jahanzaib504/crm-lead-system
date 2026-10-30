@@ -95,6 +95,7 @@ public class AnalyticsService : IAnalyticsService
                 RepId = rep.Id,
                 RepName = rep.FullName ?? rep.Email,
                 LeadCount = teamLeads.Count(l => l.AssignedToUserId == rep.Id),
+                Status = rep.IsActive,
                 TotalValue = teamLeads.Where(l => l.AssignedToUserId == rep.Id).Sum(l => l.EstimatedValue ?? 0)
             }).ToList();
 

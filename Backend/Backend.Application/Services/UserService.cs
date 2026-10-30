@@ -239,7 +239,7 @@ public class UserService : IUserService
     {
         var users = await _userRepo.GetAllAsync();
         // Return active Sales Managers (role 2)
-        return users.Where(u => u.RoleId == 2).Select(MapToDto);
+        return users.Where(u => u.IsActive && u.RoleId == 2).Select(MapToDto);
     }
 
     public async Task<IEnumerable<UserResponseDto>> GetSalesReps()
@@ -250,10 +250,10 @@ public class UserService : IUserService
 
         if (string.Equals(currentRole, "Sales Manager", StringComparison.OrdinalIgnoreCase))
         {
-            return users.Where(u => u.RoleId == 3 && u.ManagerId == currentUserId).Select(MapToDto);
+            return users.Where(u => u.IsActive && u.RoleId == 3 && u.ManagerId == currentUserId).Select(MapToDto);
         }
 
        
-        return users.Where(u => u.RoleId == 3).Select(MapToDto);
+        return users.Where(u => u.IsActive && u.RoleId == 3).Select(MapToDto);
     }
 }

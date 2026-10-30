@@ -19,6 +19,7 @@ public class RepPerformanceDto
 {
     public int RepId { get; set; }
     public string RepName { get; set; } = null!;
+    public bool Status { get; set; }
     public int LeadCount { get; set; }
     public decimal TotalValue { get; set; }
 }

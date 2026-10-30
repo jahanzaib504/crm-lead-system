@@ -8,8 +8,8 @@ import type { User } from "../types/User";
 export const UserAccessModal = ({selectedUser, setSelectedUser}: {selectedUser: User, setSelectedUser: any}) => {
     const queryClient = useQueryClient();
     const [roleId, setRoleId] = useState<number>(selectedUser.roleId ?? 3); // Default to Sales Rep if roleId is null
-    const [managerId, setManagerId] = useState<number | null>(null);
-    const [isActive, setIsActive] = useState<boolean>(false);
+    const [managerId, setManagerId] = useState<number | null>(selectedUser.managerId ?? null);
+    const [isActive, setIsActive] = useState<boolean>(selectedUser.isActive ?? true);
             
 
     const { data: managers } = useQuery({

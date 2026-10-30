@@ -13,6 +13,7 @@ export interface RepPerformance {
     repName: string;
     leadCount: number;
     totalValue: number;
+    status: boolean; // true for active, false for inactive
 }
 
 export interface DashboardAnalytics {
