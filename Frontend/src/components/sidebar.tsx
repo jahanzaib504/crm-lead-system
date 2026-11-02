@@ -10,7 +10,8 @@ import {
   Building2,
   DockIcon,
   Menu,
-  X
+  X,
+  Building,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -30,6 +31,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "User Management", path: "/admin/users", icon: Users, roles: ["Admin"] },
   { label: "Create Lead", path: "/create-lead", icon: PlusCircle },
   { label: "Audit Logs", path: "/audit-logs", icon: DockIcon, roles: ["Admin"] },
+  { label: "Companies", path: "/companies", icon: Building, roles: ["Admin"] },
 ];
 
 export const SideBar = () => {

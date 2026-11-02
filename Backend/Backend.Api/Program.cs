@@ -3,6 +3,7 @@
 
 using Backend.Api.Middlewares;
 using Backend.Application;
+using Backend.Application.Dtos;
 using Backend.Application.Services;
 using Backend.Domain.Interfaces;
 using Backend.Domain.Models;
@@ -11,6 +12,7 @@ using Backend.Infrastructure.Data;
 using Backend.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -70,6 +72,29 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero // Removes default 5-minute grace period
     };
 });
+
+builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()))
+    .ConfigureApiBehaviorOptions(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+            .Where(e => e.Value?.Errors.Count > 0)
+            .ToDictionary(
+                e => e.Key,
+                e => e.Value!.Errors.Select(x => x.ErrorMessage).ToArray());
+
+        return new BadRequestObjectResult(new ApiError
+        {
+            Status = 400,
+            Message = "Validation failed. Please check the highlighted fields.",
+            Errors = errors,
+            TraceId = context.HttpContext.TraceIdentifier
+        });
+    };
+});
+
+
 builder.Services.AddAuthorization();
 
 
@@ -107,6 +132,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowReactApp");
 //
+
 
 
 // Enable

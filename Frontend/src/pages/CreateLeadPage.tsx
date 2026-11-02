@@ -131,7 +131,7 @@ export const CreateLeadPage = () => {
         estimatedValue: 0.0
       })
     } catch (e: any) {
-        toast.error(e.response.data.title);
+        toast.error(e.response?.data?.message || "Failed to create lead");
     } finally {
       setIsSubmitting(false);
     }

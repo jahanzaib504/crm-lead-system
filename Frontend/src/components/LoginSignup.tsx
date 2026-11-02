@@ -72,7 +72,8 @@ const LoginSignup = ({ isLoginPage = false }: LoginSignupProps) => {
                 setUserStore(response.user);
                 navigate("/dashboard");
             } catch (e: any) {
-                const msg = e.response?.data?.detail || e.response?.data?.title || e.message || "Failed to log in";
+                console.log(e.response);
+                const msg = e.response?.data?.message || e.response?.data?.title || e.message || "Failed to log in";
                 toast.error(msg, { duration: 5000 });
             }
         } else {
@@ -81,7 +82,7 @@ const LoginSignup = ({ isLoginPage = false }: LoginSignupProps) => {
                 setRegistrationSuccess(true);
                 toast.success("Account registered! Awaiting admin approval.");
             } catch (e: any) {
-                const msg = e.response?.data?.detail || e.response?.data?.title || e.message || "Registration failed";
+                const msg = e.response?.data?.message || e.response?.data?.title || e.message || "Registration failed";
                 toast.error(msg);
             }
         }

@@ -1,4 +1,5 @@
-﻿using Backend.Application.Exceptions;
+﻿using Backend.Application.Dtos;
+using Backend.Application.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,11 +28,11 @@ public class GlobalExceptionHandler: IExceptionHandler
             _logger.LogError(exception, "Unhandled exception occurred.");
         }
 
-        var problemDetails = new ProblemDetails
+        var problemDetails = new ApiError
         {
             Status = statusCode,
-            Title = title,
-            Instance = httpContext.Request.Path
+            Message = title,
+            TraceId = httpContext.TraceIdentifier
         };
 
         httpContext.Response.StatusCode = statusCode;
