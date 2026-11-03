@@ -252,7 +252,7 @@ export const LeadsPage = ({ openPoolOnly = false }: LeadsPageProps) => {
                                                     disabled={acquireMutation.isPending}
                                                     className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition cursor-pointer"
                                                 >
-                                                    Claim Lead
+                                                    {acquireMutation.isPending ? "Claiming..." : "Claim Lead"}
                                                 </button>
                                             )}
                                             <Link

@@ -51,6 +51,11 @@ const LoginSignup = ({ isLoginPage = false }: LoginSignupProps) => {
             isValid = false;
         }
 
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$/;
+        if (!passwordRegex.test(user.password)) {
+            HandleError("password", "Password must contain at least one letter and one number");
+            isValid = false;
+        }
         return isValid;
     };
 
