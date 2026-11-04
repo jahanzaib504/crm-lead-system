@@ -41,7 +41,7 @@ export const LeadsPage = ({ openPoolOnly = false }: LeadsPageProps) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedStage, setSelectedStage] = useState(0);
     const [poolFilter, setPoolFilter] = useState<boolean | undefined>(openPoolOnly ? true : undefined);
-
+    const [selectedLeadId, setSelectedLeadId] = useState<number | null>(null);
     const currentUser = useUser((state) => state.user);
     const roleName = currentUser?.role?.name;
     const queryClient = useQueryClient();
@@ -55,6 +55,7 @@ export const LeadsPage = ({ openPoolOnly = false }: LeadsPageProps) => {
         mutationFn: (leadId: number) => acquireLead(leadId),
         onSuccess: () => {
             toast.success("Lead claimed from open pool!");
+            setSelectedLeadId(null);
             queryClient.invalidateQueries({ queryKey: ["leads"] });
             queryClient.invalidateQueries({ queryKey: ["open-pool-leads"] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
@@ -248,11 +249,11 @@ export const LeadsPage = ({ openPoolOnly = false }: LeadsPageProps) => {
                                         <div className="flex items-center gap-2">
                                             {canClaim && (
                                                 <button
-                                                    onClick={() => acquireMutation.mutate(lead.id)}
+                                                    onClick={() => { setSelectedLeadId(lead.id); acquireMutation.mutate(lead.id); }}
                                                     disabled={acquireMutation.isPending}
                                                     className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition cursor-pointer"
                                                 >
-                                                    {acquireMutation.isPending ? "Claiming..." : "Claim Lead"}
+                                                    {selectedLeadId === lead.id && acquireMutation.isPending ? "Claiming..." : "Claim Lead"}
                                                 </button>
                                             )}
                                             <Link

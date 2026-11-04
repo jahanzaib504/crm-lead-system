@@ -62,13 +62,13 @@ public class AuthService
             throw new ConflictException("User with this email already exists");
         }
 
-        int roleId = userData.RoleId ?? 3; // Default to Sales Rep (role 3)
+       
 
         User userToBeStored = new User
         {
             FullName = userData.FullName,
             Email = userData.Email,
-            RoleId = roleId,
+      
             IsActive = false,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = "SelfRegistration"

@@ -17,7 +17,7 @@ export const UserAccessModal = ({selectedUser, setSelectedUser}: {selectedUser: 
         queryFn: getManagers,
         enabled: Boolean(selectedUser),
     });
-
+    
     // Mutations
     const updateAccessMutation = useMutation({
         mutationFn: ({ id, roleId, managerId, isActive }: { id: number; roleId: number; managerId: number | null; isActive: boolean }) =>

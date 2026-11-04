@@ -16,5 +16,5 @@ public class RegisterUserDto
     [Required, MinLength(6), MaxLength(100)]
     public string Password { get; set; } = null!;
 
-    public int? RoleId { get; set; }
+    
 }

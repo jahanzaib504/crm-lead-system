@@ -48,7 +48,7 @@ export const Dashboard = () => {
     const roleName = user?.role?.name || "Sales Rep";
     const queryClient = useQueryClient();
     const [selectedPendingUser, setSelectedPendingUser] = useState<any>(null);
-
+    const [selectedLeadId, setSelectedLeadId] = useState<number | null>(null);
     // Queries
     const { data: analytics, isPending: analyticsLoading } = useQuery({
         queryKey: ["dashboard-analytics"],
@@ -76,12 +76,13 @@ export const Dashboard = () => {
 
 
     const acquireMutation = useMutation({
-        mutationFn: (leadId: number) => acquireLead(leadId),
+        mutationFn: (leadId: number) => { setSelectedLeadId(leadId); return acquireLead(leadId); },
         onSuccess: () => {
             toast.success("Lead acquired successfully!");
             queryClient.invalidateQueries({ queryKey: ["open-pool-leads"] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
             queryClient.invalidateQueries({ queryKey: ["leads"] });
+            setSelectedLeadId(null);
         },
         onError: (err: any) => {
             toast.error(err.response?.data?.detail || "Failed to acquire lead.");
@@ -420,7 +421,7 @@ export const Dashboard = () => {
                                             disabled={acquireMutation.isPending}
                                             className="px-3.5 py-1.5 w-fit bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-xs transition shrink-0 cursor-pointer"
                                         >
-                                            Acquire Lead
+                                            {selectedLeadId === opLead.id && acquireMutation.isPending ? "Acquiring..." : "Acquire Lead"}
                                         </button>
                                     </div>
                                 ))}

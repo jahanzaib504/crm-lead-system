@@ -244,7 +244,7 @@ const LoginSignup = ({ isLoginPage = false }: LoginSignupProps) => {
                             </form>
 
                             {/* Demo Accounts Helper */}
-                            <div className="mt-6 pt-4 border-t border-gray-100 text-xs text-gray-500">
+                            {/* <div className="mt-6 pt-4 border-t border-gray-100 text-xs text-gray-500">
                                 <p className="font-semibold text-gray-700 mb-1.5">Demo Credentials:</p>
                                 <div className="space-y-1 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                                     <div className="flex justify-between">
@@ -260,7 +260,7 @@ const LoginSignup = ({ isLoginPage = false }: LoginSignupProps) => {
                                         <code className="text-slate-600">john.rep@crm.com / Password123</code>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */} 
                         </>
                     )}
                 </div>
