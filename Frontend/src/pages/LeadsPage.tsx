@@ -49,12 +49,20 @@ export const LeadsPage = ({ openPoolOnly = false }: LeadsPageProps) => {
     const { data, isPending, isError } = useQuery({
         queryKey: ["leads", page, pageSize, searchTerm, selectedStage, poolFilter],
         queryFn: () => getLeadsPaged(page, pageSize, searchTerm, selectedStage || undefined, poolFilter),
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        },
     });
 
     const acquireMutation = useMutation({
         mutationFn: (leadId: number) => acquireLead(leadId),
-        onSuccess: () => {
-            toast.success("Lead claimed from open pool!");
+        onSuccess: ({ data, message }) => {
+            if (!data) {
+                toast.error(message);
+                return;
+            }
+            toast.success(message);
             setSelectedLeadId(null);
             queryClient.invalidateQueries({ queryKey: ["leads"] });
             queryClient.invalidateQueries({ queryKey: ["open-pool-leads"] });

@@ -1,4 +1,5 @@
 ﻿using Backend.Application.Dtos.AuditLog;
+using Backend.Application.Dtos.Api;
 using Backend.Application.Dtos.Common;
 using Backend.Application.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -8,17 +9,18 @@ namespace Backend.Api.Controllers;
 
 [ApiController]
 [Route("/audit-logs")]
-public class AuditLogController: Controller
+public class AuditLogController: ControllerBase
 {
-    IAuditLogService _auditLogService;
+    private readonly IAuditLogService _auditLogService;
     public AuditLogController(IAuditLogService auditLogService)
     {
         _auditLogService = auditLogService;
     }
     [HttpGet]
     [Authorize(Roles = "Admin")]
-    public async Task<PagedResponseDto<AuditLogResponseDto>> GetAuditLogsPaged([FromQuery] AuditLogRequestDto requestDto)
+    public async Task<ActionResult<ApiResponse<PagedResponseDto<AuditLogResponseDto>>>> GetAuditLogsPaged([FromQuery] AuditLogRequestDto requestDto)
     {
-        return await _auditLogService.GetAuditLogsPaged(requestDto);
+        var result = await _auditLogService.GetAuditLogsPaged(requestDto);
+        return Ok(new ApiResponse<PagedResponseDto<AuditLogResponseDto>>(StatusCodes.Status200OK, "Audit logs retrieved successfully", result));
     }
 }

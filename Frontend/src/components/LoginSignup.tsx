@@ -68,13 +68,13 @@ const LoginSignup = ({ isLoginPage = false }: LoginSignupProps) => {
 
         if (isLoginPage) {
             try {
-                const response = await login({ email, password });
-                localStorage.setItem("token", response.token);
-                if (response.refreshToken) localStorage.setItem("refreshToken", response.refreshToken);
-                if (response.expiresAt) localStorage.setItem("expiresAt", response.expiresAt);
+                const { data, message } = await login({ email, password });
+                localStorage.setItem("token", data.token);
+                if (data.refreshToken) localStorage.setItem("refreshToken", data.refreshToken);
+                if (data.expiresAt) localStorage.setItem("expiresAt", data.expiresAt);
                 
-                toast.success("Logged in successfully!");
-                setUserStore(response.user);
+                toast.success(message);
+                setUserStore(data.user);
                 navigate("/dashboard");
             } catch (e: any) {
                 console.log(e.response);
@@ -83,9 +83,9 @@ const LoginSignup = ({ isLoginPage = false }: LoginSignupProps) => {
             }
         } else {
             try {
-                await register({ email, fullName, password });
+                const { message } = await register({ email, fullName, password });
                 setRegistrationSuccess(true);
-                toast.success("Account registered! Awaiting admin approval.");
+                toast.success(message);
             } catch (e: any) {
                 const msg = e.response?.data?.message || e.response?.data?.title || e.message || "Registration failed";
                 toast.error(msg);

@@ -73,8 +73,12 @@ export const SingleLeadPage = () => {
         // Implement the delete lead functionality here
         // For example, you might call a deleteLead API function and then invalidate queries
         try{
-            await deleteLead(leadId); // Assuming deleteLead is an API function you've defined
-            toast.success("Lead deleted successfully!");
+            const { data, message } = await deleteLead(leadId);
+            if (!data) {
+                toast.error(message);
+                return;
+            }
+            toast.success(message);
             queryClient.invalidateQueries({ queryKey: ["leads"] });
             navigate("/leads"); // Redirect to leads overview after deletion
         }
@@ -90,8 +94,12 @@ export const SingleLeadPage = () => {
     const handleWithdrawLead = async() => {
         // Implement the withdraw lead functionality here
         try{
-            await withdrawLead(leadId); // Assuming withdrawLead is the API function to withdraw the lead
-            toast.success("Lead withdrawn successfully!");
+            const { data, message } = await withdrawLead(leadId);
+            if (!data) {
+                toast.error(message);
+                return;
+            }
+            toast.success(message);
             queryClient.invalidateQueries({ queryKey: ["lead", leadId] });
             queryClient.invalidateQueries({ queryKey: ["leads"] });
             queryClient.invalidateQueries({ queryKey: ["open-pool-leads"] });
@@ -116,44 +124,72 @@ export const SingleLeadPage = () => {
     const { data: lead, isPending: leadLoading, isError: leadError } = useQuery({
         queryKey: ["lead", leadId],
         queryFn: () => getLead(leadId),
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        },
         enabled: !isNaN(leadId),
     });
 
     const { data: notes } = useQuery({
         queryKey: ["lead-notes", leadId],
         queryFn: () => getNotesForLead(leadId),
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        },
         enabled: !isNaN(leadId),
     });
 
     const { data: followUps } = useQuery({
         queryKey: ["lead-followups", leadId],
         queryFn: () => getFollowUpsByLead(leadId),
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        },
         enabled: !isNaN(leadId),
     });
 
     const { data: activities } = useQuery({
         queryKey: ["lead-activities", leadId],
         queryFn: () => getActivitiesByLead(leadId),
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        },
         enabled: !isNaN(leadId),
     });
 
     const { data: salesReps } = useQuery({
         queryKey: ["sales-reps"],
         queryFn: getSalesReps,
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        },
         enabled: isAssignModalOpen && roleName === "Sales Manager",
     });
 
     const { data: managers } = useQuery({
         queryKey: ["managers-list"],
         queryFn: getManagers,
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        },
         enabled: isAssignModalOpen && roleName === "Admin",
     });
 
     // Mutations
     const acquireMutation = useMutation({
         mutationFn: () => acquireLead(leadId),
-        onSuccess: () => {
-            toast.success("Lead acquired successfully!");
+        onSuccess: ({ data, message }) => {
+            if (!data) {
+                toast.error(message);
+                return;
+            }
+            toast.success(message);
             queryClient.invalidateQueries({ queryKey: ["lead", leadId] });
             queryClient.invalidateQueries({ queryKey: ["leads"] });
             queryClient.invalidateQueries({ queryKey: ["open-pool-leads"] });
@@ -164,8 +200,12 @@ export const SingleLeadPage = () => {
 
     const stageMutation = useMutation({
         mutationFn: (newStageId: number) => updateLeadStage(leadId, newStageId),
-        onSuccess: () => {
-            toast.success("Lead stage updated!");
+        onSuccess: ({ data, message }) => {
+            if (!data) {
+                toast.error(message);
+                return;
+            }
+            toast.success(message);
             queryClient.invalidateQueries({ queryKey: ["lead", leadId] });
             queryClient.invalidateQueries({ queryKey: ["leads"] });
         },
@@ -175,8 +215,12 @@ export const SingleLeadPage = () => {
 
     const assignMutation = useMutation({
         mutationFn: (userId: number) => assignLead(leadId, userId),
-        onSuccess: () => {
-            toast.success(roleName === "Admin" ? "Lead assigned to manager successfully!" : "Lead assigned to representative successfully!");
+        onSuccess: ({ data, message }) => {
+            if (!data) {
+                toast.error(message);
+                return;
+            }
+            toast.success(message);
             queryClient.invalidateQueries({ queryKey: ["lead", leadId] });
             queryClient.invalidateQueries({ queryKey: ["leads"] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
@@ -187,8 +231,12 @@ export const SingleLeadPage = () => {
 
     const addNoteMutation = useMutation({
         mutationFn: (content: string) => createNote({ leadId, content }),
-        onSuccess: () => {
-            toast.success("Note added!");
+        onSuccess: ({ data, message }) => {
+            if (!data) {
+                toast.error(message);
+                return;
+            }
+            toast.success(message);
             setNoteContent("");
             queryClient.invalidateQueries({ queryKey: ["lead-notes", leadId] });
         },
@@ -198,8 +246,12 @@ export const SingleLeadPage = () => {
     const addFollowUpMutation = useMutation({
         mutationFn: (payload: { title: string; dueDate: string; priority: string }) =>
             createFollowUp({ leadId, ...payload }),
-        onSuccess: () => {
-            toast.success("Follow-up scheduled!");
+        onSuccess: ({ data, message }) => {
+            if (!data) {
+                toast.error(message);
+                return;
+            }
+            toast.success(message);
             setIsFollowUpModalOpen(false);
             setFollowUpForm({ title: "", dueDate: "", priority: "Medium" });
             queryClient.invalidateQueries({ queryKey: ["lead-followups", leadId] });
@@ -210,16 +262,24 @@ export const SingleLeadPage = () => {
     const toggleFollowUpMutation = useMutation({
         mutationFn: ({ id, status }: { id: number; status: string }) =>
             updateFollowUpStatus(id, status),
-        onSuccess: () => {
-            toast.success("Follow-up status updated!");
+        onSuccess: ({ data, message }) => {
+            if (!data) {
+                toast.error(message);
+                return;
+            }
+            toast.success(message);
             queryClient.invalidateQueries({ queryKey: ["lead-followups", leadId] });
         }
     });
 
     const addActivityMutation = useMutation({
         mutationFn: (payload: any) => createActivity({ leadId, ...payload }),
-        onSuccess: () => {
-            toast.success("Activity logged!");
+        onSuccess: ({ data, message }) => {
+            if (!data) {
+                toast.error(message);
+                return;
+            }
+            toast.success(message);
             setIsActivityModalOpen(false);
             setActivityForm({ activityType: "Call", subject: "", summary: "", activityDate: new Date().toISOString().slice(0, 16) });
             queryClient.invalidateQueries({ queryKey: ["lead-activities", leadId] });

@@ -1,4 +1,5 @@
 using Backend.Application.Dtos.User;
+using Backend.Application.Dtos.Api;
 using Backend.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,65 +21,65 @@ public class UserController : ControllerBase
 
     [HttpPost("approve/{id}")] // This endpoint is used to approve a user by their ID. It only works for first sign up
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<bool>> ApproveUser(int id, [FromBody] ApproveUserDto dto)
+    public async Task<ActionResult<ApiResponse<bool>>> ApproveUser(int id, [FromBody] ApproveUserDto dto)
     {
         var result = await _userService.ApproveUser(id, dto);
-        return Ok(result);
+        return Ok(new ApiResponse<bool>(StatusCodes.Status200OK, "User approved successfully", result));
     }
 
     [HttpPost("grant-access/{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<bool>> GrantAccessToUser(int id)
+    public async Task<ActionResult<ApiResponse<bool>>> GrantAccessToUser(int id)
     {
         var result = await _userService.GrantAccessToUser(id);
-        return Ok(result);
+        return Ok(new ApiResponse<bool>(StatusCodes.Status200OK, "User access granted successfully", result));
     }
 
     [HttpPost("revoke-access/{id}")]
     [Authorize(Roles = "Admin,Sales Manager")]
-    public async Task<ActionResult<bool>> RevokeAccess(int id)
+    public async Task<ActionResult<ApiResponse<bool>>> RevokeAccess(int id)
     {
         var result = await _userService.RevokeAccess(id);
-        return Ok(result);
+        return Ok(new ApiResponse<bool>(StatusCodes.Status200OK, "User access revoked successfully", result));
     }
 
     [HttpGet("me")]
     [Authorize]
-    public async Task<ActionResult<UserResponseDto>> GetMe()
+    public async Task<ActionResult<ApiResponse<UserResponseDto>>> GetMe()
     {
         var result = await _userService.GetMe();
-        return Ok(result);
+        return Ok(new ApiResponse<UserResponseDto>(StatusCodes.Status200OK, "Current user retrieved successfully", result));
     }
 
     [HttpGet]
     [Authorize(Roles = "Admin,Sales Manager")]
-    public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetAllUsers()
+    public async Task<ActionResult<ApiResponse<IEnumerable<UserResponseDto>>>> GetAllUsers()
     {
         var result = await _userService.GetAllUsers();
-        return Ok(result);
+        return Ok(new ApiResponse<IEnumerable<UserResponseDto>>(StatusCodes.Status200OK, "Users retrieved successfully", result));
     }
 
     [HttpGet("pending")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetPendingUsers()
+    public async Task<ActionResult<ApiResponse<IEnumerable<UserResponseDto>>>> GetPendingUsers()
     {
         var result = await _userService.GetPendingUsers();
-        return Ok(result);
+        return Ok(new ApiResponse<IEnumerable<UserResponseDto>>(StatusCodes.Status200OK, "Pending users retrieved successfully", result));
     }
 
     [HttpGet("managers")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetManagers()
+    public async Task<ActionResult<ApiResponse<IEnumerable<UserResponseDto>>>> GetManagers()
     {
         var result = await _userService.GetManagers();
-        return Ok(result);
+        return Ok(new ApiResponse<IEnumerable<UserResponseDto>>(StatusCodes.Status200OK, "Managers retrieved successfully", result));
     }
 
     [HttpGet("reps")]
     [Authorize(Roles = "Admin,Sales Manager")]
-    public async Task<ActionResult<IEnumerable<UserResponseDto>>> GetSalesReps()
+    public async Task<ActionResult<ApiResponse<IEnumerable<UserResponseDto>>>> GetSalesReps()
     {
         var result = await _userService.GetSalesReps();
-        return Ok(result);
+        return Ok(new ApiResponse<IEnumerable<UserResponseDto>>(StatusCodes.Status200OK, "Sales representatives retrieved successfully", result));
     }
 }

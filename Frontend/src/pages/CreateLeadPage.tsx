@@ -116,8 +116,12 @@ export const CreateLeadPage = () => {
 
     setIsSubmitting(true);
     try {
-      await createLeadWithContact(lead);
-      toast.success("Lead created successfully");
+      const { data, message } = await createLeadWithContact(lead);
+      if (!data) {
+        toast.error(message);
+        return;
+      }
+      toast.success(message);
       setStep(0);
       setLead({
         firstName: "",

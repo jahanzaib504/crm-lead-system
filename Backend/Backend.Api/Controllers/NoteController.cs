@@ -1,4 +1,5 @@
 using Backend.Application.Dtos.Common;
+using Backend.Application.Dtos.Api;
 using Backend.Application.Dtos.Note;
 using Backend.Application.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -21,33 +22,34 @@ public class NoteController : ControllerBase
 
     [HttpGet("{id}")]
     [Authorize]
-    public async Task<ActionResult<NoteResponseDto>> GetNote(int id)
+    public async Task<ActionResult<ApiResponse<NoteResponseDto>>> GetNote(int id)
     {
         var res = await _noteService.GetNote(id);
-        return Ok(res);
+        return Ok(new ApiResponse<NoteResponseDto>(StatusCodes.Status200OK, "Note retrieved successfully", res));
     }
 
     [HttpGet("lead/{leadId}")]
     [Authorize]
-    public async Task<ActionResult<IEnumerable<NoteResponseDto>>> GetNotesForLead(int leadId)
+    public async Task<ActionResult<ApiResponse<IEnumerable<NoteResponseDto>>>> GetNotesForLead(int leadId)
     {
         var res = await _noteService.GetNotesForLead(leadId);
-        return Ok(res);
+        return Ok(new ApiResponse<IEnumerable<NoteResponseDto>>(StatusCodes.Status200OK, "Notes retrieved successfully", res));
     }
 
     [HttpGet]
     [Authorize]
-    public async Task<ActionResult<PagedResponseDto<NoteResponseDto>>> GetPagedNotes([FromQuery] NotePagedRequestDto dto)
+    public async Task<ActionResult<ApiResponse<PagedResponseDto<NoteResponseDto>>>> GetPagedNotes([FromQuery] NotePagedRequestDto dto)
     {
         var res = await _noteService.GetPagedNotes(dto);
-        return Ok(res);
+        return Ok(new ApiResponse<PagedResponseDto<NoteResponseDto>>(StatusCodes.Status200OK, "Notes retrieved successfully", res));
     }
 
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<NoteResponseDto>> CreateNote([FromBody] CreateNoteDto dto)
+    public async Task<ActionResult<ApiResponse<NoteResponseDto>>> CreateNote([FromBody] CreateNoteDto dto)
     {
         var res = await _noteService.CreateNote(dto);
-        return Ok(res);
+        var response = new ApiResponse<NoteResponseDto>(StatusCodes.Status201Created, "Note created successfully", res);
+        return CreatedAtAction(nameof(GetNote), new { id = res.Id }, response);
     }
 }

@@ -1,6 +1,7 @@
 ﻿
 
 using Backend.Application.Dtos;
+using Backend.Application.Dtos.Api;
 using Backend.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,25 +20,24 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")] 
-    public async Task<ActionResult<AuthResponseDto>> RegisterUser([FromBody] RegisterUserDto userData) // 3. Use async/await and ActionResult
+    public async Task<ActionResult<ApiResponse<AuthResponseDto>>> RegisterUser([FromBody] RegisterUserDto userData)
     {
-        // 4. RegisterUserAsync returns a Task, so you MUST await it
         var res = await _authService.RegisterUserAsync(userData);
-        return Ok(res);
+        var response = new ApiResponse<AuthResponseDto>(StatusCodes.Status201Created, "User registered successfully", res);
+        return StatusCode(StatusCodes.Status201Created, response);
     }
     [HttpPost("login")]
-    public async Task<ActionResult<AuthResponseDto>> LoginUser([FromBody] LoginUserDto userData) // 3. Use async/await and ActionResult
+    public async Task<ActionResult<ApiResponse<AuthResponseDto>>> LoginUser([FromBody] LoginUserDto userData)
     {
-        // 4. RegisterUserAsync returns a Task, so you MUST await it
         var res = await _authService.LoginUserAsync(userData);
-        return Ok(res);
+        return Ok(new ApiResponse<AuthResponseDto>(StatusCodes.Status200OK, "User logged in successfully", res));
     }
 
     [HttpPost("logout")]
     [Authorize]
-    public async Task<IActionResult> LogoutUser(CancellationToken cancellationToken)
+    public async Task<ActionResult<ApiResponse<bool>>> LogoutUser(CancellationToken cancellationToken)
     {
         await _authService.LogoutUserAsync(cancellationToken);
-        return NoContent();
+        return Ok(new ApiResponse<bool>(StatusCodes.Status200OK, "User logged out successfully", true));
     }
 }

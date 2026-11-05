@@ -1,4 +1,5 @@
 ﻿using Backend.Application.Dtos;
+using Backend.Application.Dtos.Api;
 using Backend.Application.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;

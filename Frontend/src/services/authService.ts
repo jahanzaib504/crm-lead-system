@@ -1,4 +1,5 @@
 import api from "../api";
+import type { ApiResponse } from "../types/ApiResponse";
 import type { User } from "../types/User";
 
 export interface LoginResponse {
@@ -24,21 +25,20 @@ export interface RegisterArgs {
     password: string;
 }
 
-export const register = async ({ fullName, email, password }: RegisterArgs): Promise<RegisterResponse> => {
-    const request = await api.post("/auth/register", { fullName, email, password });
+export const register = async ({ fullName, email, password }: RegisterArgs): Promise<ApiResponse<RegisterResponse>> => {
+    const request = await api.post<ApiResponse<RegisterResponse>>("/auth/register", { fullName, email, password });
     return request.data;
 };
 
-export const login = async ({ email, password }: LoginArgs): Promise<LoginResponse> => {
-    const request = await api.post("/auth/login", { email, password });
+export const login = async ({ email, password }: LoginArgs): Promise<ApiResponse<LoginResponse>> => {
+    const request = await api.post<ApiResponse<LoginResponse>>("/auth/login", { email, password });
     return request.data;
 };
 
-export const logout = async () => {
+export const logout = async (): Promise<ApiResponse<boolean>> => {
     try {
-        await api.post("/auth/logout");
-    } catch (error) {
-        console.error("Failed to record the logout audit event.", error);
+        const response = await api.post<ApiResponse<boolean>>("/auth/logout");
+        return response.data;
     } finally {
         localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");

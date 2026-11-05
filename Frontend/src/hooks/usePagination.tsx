@@ -1,21 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react"
+import type { ApiResponse } from "../types/ApiResponse";
 import type { PaginationResponse } from "../types/PaginationResponse";
 
 interface PaginationInterface<T>{
     keys: any[], // Use string array or primitive key
     page?: number,
     pageSize?: number,
-    fn: (page: number, pageSize: number) => Promise<PaginationResponse<T>>
+    fn: (page: number, pageSize: number) => Promise<ApiResponse<PaginationResponse<T>>>
 }
 
 export const usePagination = <T, >(initial: PaginationInterface<T>) =>{
     const [page, setPage] = useState<number>(initial.page ?? 1);
     const pageSize = initial.pageSize ?? 8;
 
-    const { data, isPending, isError } = useQuery<PaginationResponse<T>>({
+    const { data, isPending, isError } = useQuery<ApiResponse<PaginationResponse<T>>, Error, PaginationResponse<T>>({
         queryKey: [...initial.keys, page, pageSize], 
-        queryFn: () => initial.fn(page, pageSize)
+        queryFn: () => initial.fn(page, pageSize),
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        }
     });
     
     const totalCount = data?.totalCount ?? 0;

@@ -1,4 +1,5 @@
 using Backend.Application.Dtos.Common;
+using Backend.Application.Dtos.Api;
 using Backend.Application.Dtos.Lead;
 using Backend.Application.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -20,32 +21,38 @@ public class LeadController : ControllerBase
     }
 
     [HttpPost("create")]
-    public async Task<ActionResult<bool>> CreateLeadWithContact([FromBody] CreateLeadWithContactDto dto)
+    public async Task<ActionResult<ApiResponse<bool>>> CreateLeadWithContact([FromBody] CreateLeadWithContactDto dto)
     {
         await _leadService.RegisterWithContactAsync(dto);
-        return Ok(true);
+        var response = new ApiResponse<bool>(StatusCodes.Status201Created, "Lead created successfully", true);
+        return StatusCode(StatusCodes.Status201Created, response);
     }
 
     [HttpPost]
     [Authorize]
-    public async Task<ActionResult<LeadResponseDto>> CreateLead([FromBody] CreateLeadDto leadDto)
+    public async Task<ActionResult<ApiResponse<LeadResponseDto>>> CreateLead([FromBody] CreateLeadDto leadDto)
     {
         var res = await _leadService.RegisterAsync(leadDto);
-        return Ok(res);
+        var response = new ApiResponse<LeadResponseDto>(StatusCodes.Status201Created, "Lead created successfully", res);
+        return CreatedAtAction(nameof(GetLead), new { id = res.Id }, response);
     }
 
     [HttpGet("{id}")]
     [Authorize]
-    public async Task<ActionResult<LeadResponseDto>> GetLead(int id)
+    public async Task<ActionResult<ApiResponse<LeadResponseDto>>> GetLead(int id)
     {
         var res = await _leadService.GetByIdAsync(id);
-        if (res == null) return NotFound();
-        return Ok(res);
+        if (res == null)
+        {
+            return NotFound(new ApiError { Status = StatusCodes.Status404NotFound, Message = "Lead not found." });
+        }
+
+        return Ok(new ApiResponse<LeadResponseDto>(StatusCodes.Status200OK, "Lead retrieved successfully", res));
     }
 
     [HttpGet]
     [Authorize]
-    public async Task<ActionResult<PagedResponseDto<LeadResponseDto>>> GetLeadPaged(
+    public async Task<ActionResult<ApiResponse<PagedResponseDto<LeadResponseDto>>>> GetLeadPaged(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
         [FromQuery] string? search = null,
@@ -53,62 +60,72 @@ public class LeadController : ControllerBase
         [FromQuery] bool? openPool = null)
     {
         var res = await _leadService.GetPagedAsync(pageNumber, pageSize, search, stageId, openPool);
-        return Ok(res);
+        return Ok(new ApiResponse<PagedResponseDto<LeadResponseDto>>(StatusCodes.Status200OK, "Leads retrieved successfully", res));
     }
 
     [HttpGet("pool")]
     [Authorize(Roles = "Admin,Sales Manager")]
-    public async Task<ActionResult<IEnumerable<LeadResponseDto>>> GetOpenPoolLeads()
+    public async Task<ActionResult<ApiResponse<IEnumerable<LeadResponseDto>>>> GetOpenPoolLeads()
     {
         var res = await _leadService.GetOpenPoolLeads();
-        return Ok(res);
+        return Ok(new ApiResponse<IEnumerable<LeadResponseDto>>(StatusCodes.Status200OK, "Open pool leads retrieved successfully", res));
     }
 
     [HttpPost("{id}/acquire")]
     [Authorize(Roles = "Admin,Sales Manager")]
-    public async Task<ActionResult<bool>> AcquireLead(int id)
+    public async Task<ActionResult<ApiResponse<bool>>> AcquireLead(int id)
     {
         var res = await _leadService.AcquireLead(id);
-        return Ok(res);
+        return Ok(new ApiResponse<bool>(StatusCodes.Status200OK, "Lead acquired successfully", res));
     }
 
     [HttpPost("{id}/withdraw")]
     [Authorize(Roles = "Admin,Sales Manager")]
-    public async Task<ActionResult<bool>> WithdrawLead(int id)
+    public async Task<ActionResult<ApiResponse<bool>>> WithdrawLead(int id)
     {
         var res = await _leadService.WithdrawLead(id);
-        return Ok(res);
+        return Ok(new ApiResponse<bool>(StatusCodes.Status200OK, "Lead withdrawn successfully", res));
     }
 
     [HttpPost("{id}/assign")]
     [Authorize(Roles = "Admin,Sales Manager")]
-    public async Task<ActionResult<bool>> AssignLead(int id, [FromBody] AssignLeadDto dto)
+    public async Task<ActionResult<ApiResponse<bool>>> AssignLead(int id, [FromBody] AssignLeadDto dto)
     {
         var res = await _leadService.AssignLead(id, dto);
-        return Ok(res);
+        return Ok(new ApiResponse<bool>(StatusCodes.Status200OK, "Lead assigned successfully", res));
     }
 
     [HttpPatch("{id}/stage")]
     [Authorize]
-    public async Task<ActionResult<bool>> UpdateLeadStage(int id, [FromBody] UpdateLeadStageDto dto)
+    public async Task<ActionResult<ApiResponse<bool>>> UpdateLeadStage(int id, [FromBody] UpdateLeadStageDto dto)
     {
         var res = await _leadService.UpdateStageAsync(id, dto.StageId);
-        return Ok(res);
+        return Ok(new ApiResponse<bool>(StatusCodes.Status200OK, "Lead stage updated successfully", res));
     }
 
     [HttpPut("{id}")]
     [Authorize]
-    public async Task<ActionResult<bool>> UpdateLead(int id, [FromBody] UpdateLeadDto dto)
+    public async Task<ActionResult<ApiResponse<bool>>> UpdateLead(int id, [FromBody] UpdateLeadDto dto)
     {
         var res = await _leadService.UpdateAsync(id, dto);
-        return Ok(res);
+        if (!res)
+        {
+            return NotFound(new ApiError { Status = StatusCodes.Status404NotFound, Message = "Lead not found." });
+        }
+
+        return Ok(new ApiResponse<bool>(StatusCodes.Status200OK, "Lead updated successfully", res));
     }
 
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<bool>> DeleteLead(int id)
+    public async Task<ActionResult<ApiResponse<bool>>> DeleteLead(int id)
     {
         var res = await _leadService.DeleteAsync(id);
-        return Ok(res);
+        if (!res)
+        {
+            return NotFound(new ApiError { Status = StatusCodes.Status404NotFound, Message = "Lead not found." });
+        }
+
+        return Ok(new ApiResponse<bool>(StatusCodes.Status200OK, "Lead deleted successfully", res));
     }
 }

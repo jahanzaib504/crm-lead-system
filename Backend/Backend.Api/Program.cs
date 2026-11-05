@@ -4,6 +4,7 @@
 using Backend.Api.Middlewares;
 using Backend.Application;
 using Backend.Application.Dtos;
+using Backend.Application.Dtos.Api;
 using Backend.Application.Services;
 using Backend.Domain.Interfaces;
 using Backend.Domain.Models;
@@ -15,15 +16,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -117,6 +115,23 @@ builder.Services.AddInfrastructureServices();
 // Add application services
 builder.Services.AddApplicationServices();
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Paste only the token (without the word Bearer)."
+    });
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+    });
+});
 
 
 

@@ -1,4 +1,5 @@
 using Backend.Application.Dtos.Activity;
+using Backend.Application.Dtos.Api;
 using Backend.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,30 +21,36 @@ public class ActivityController : ControllerBase
     }
 
     [HttpGet("lead/{leadId}")]
-    public async Task<ActionResult<IEnumerable<ActivityResponseDto>>> GetByLead(int leadId)
+    public async Task<ActionResult<ApiResponse<IEnumerable<ActivityResponseDto>>>> GetByLead(int leadId)
     {
         var res = await _activityService.GetByLeadId(leadId);
-        return Ok(res);
+        return Ok(new ApiResponse<IEnumerable<ActivityResponseDto>>(StatusCodes.Status200OK, "Activities retrieved successfully", res));
     }
 
     [HttpGet("my")]
-    public async Task<ActionResult<IEnumerable<ActivityResponseDto>>> GetMyActivities()
+    public async Task<ActionResult<ApiResponse<IEnumerable<ActivityResponseDto>>>> GetMyActivities()
     {
         var res = await _activityService.GetMyActivities();
-        return Ok(res);
+        return Ok(new ApiResponse<IEnumerable<ActivityResponseDto>>(200, "My activities retrieved successfully", res));
     }
 
     [HttpPost]
-    public async Task<ActionResult<ActivityResponseDto>> Create([FromBody] CreateActivityDto dto)
+    public async Task<ActionResult<ApiResponse<ActivityResponseDto>>> Create([FromBody] CreateActivityDto dto)
     {
         var res = await _activityService.CreateActivity(dto);
-        return Ok(res);
+        var response = new ApiResponse<ActivityResponseDto>(StatusCodes.Status201Created, "Activity created successfully", res);
+        return StatusCode(StatusCodes.Status201Created, response);
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult<bool>> Delete(int id)
+    public async Task<ActionResult<ApiResponse<bool>>> Delete(int id)
     {
         var res = await _activityService.DeleteActivity(id);
-        return Ok(res);
+        if (!res)
+        {
+            return NotFound(new ApiError { Status = StatusCodes.Status404NotFound, Message = "Activity not found." });
+        }
+
+        return Ok(new ApiResponse<bool>(StatusCodes.Status200OK, "Activity deleted successfully", res));
     }
 }

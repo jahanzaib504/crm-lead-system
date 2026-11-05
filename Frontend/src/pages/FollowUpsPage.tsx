@@ -10,12 +10,20 @@ export const FollowUpsPage = () => {
     const { data: followUps, isPending } = useQuery({
         queryKey: ["my-followups"],
         queryFn: getMyPendingFollowUps,
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        },
     });
 
     const toggleMutation = useMutation({
         mutationFn: ({ id, status }: { id: number; status: string }) => updateFollowUpStatus(id, status),
-        onSuccess: () => {
-            toast.success("Follow-up updated!");
+        onSuccess: ({ data, message }) => {
+            if (!data) {
+                toast.error(message);
+                return;
+            }
+            toast.success(message);
             queryClient.invalidateQueries({ queryKey: ["my-followups"] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
         }

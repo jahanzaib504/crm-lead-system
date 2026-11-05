@@ -29,12 +29,20 @@ export const AdminUsersManagementPage = () => {
     const { data: pendingUsers, isPending: pendingLoading } = useQuery({
         queryKey: ["admin-pending-users"],
         queryFn: getPendingUsers,
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        },
     });
 
 
     const { data: allUsers, isPending: allLoading } = useQuery({
         queryKey: ["admin-all-users"],
         queryFn: getUsers,
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        },
     });
 
 
@@ -42,9 +50,14 @@ export const AdminUsersManagementPage = () => {
 
     const revokeMutation = useMutation({
         mutationFn: (id: number) => revokeAccess(id),
-        onSuccess: () => {
+        onSuccess: ({ data, message }) => {
+            if (!data) {
+                toast.error(message);
+                setLoadingId(null);
+                return;
+            }
             setLoadingId(null);
-            toast.success("User access revoked.");
+            toast.success(message);
             queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
         }
@@ -52,9 +65,14 @@ export const AdminUsersManagementPage = () => {
 
     const grantMutation = useMutation({ // Revoking user access will change pending users in dashboard
         mutationFn: (id: number) => grantAccess(id),
-        onSuccess: () => {
+        onSuccess: ({ data, message }) => {
+            if (!data) {
+                toast.error(message);
+                setLoadingId(null);
+                return;
+            }
             setLoadingId(null);
-            toast.success("User access granted.");
+            toast.success(message);
             queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
         }
@@ -274,4 +292,3 @@ export const AdminUsersManagementPage = () => {
         </div>
     );
 };
-

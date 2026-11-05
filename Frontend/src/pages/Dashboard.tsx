@@ -53,11 +53,19 @@ export const Dashboard = () => {
     const { data: analytics, isPending: analyticsLoading } = useQuery({
         queryKey: ["dashboard-analytics"],
         queryFn: getDashboardAnalytics,
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        },
     });
 
     const { data: pendingUsers } = useQuery({
         queryKey: ["pending-users"],
         queryFn: getPendingUsers,
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        },
         enabled: roleName === "Admin",
     });
 
@@ -65,20 +73,33 @@ export const Dashboard = () => {
     const { data: openPoolLeads } = useQuery({
         queryKey: ["open-pool-leads"],
         queryFn: getOpenPoolLeads,
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        },
         enabled: roleName === "Sales Manager" || roleName === "Admin",
     }); // only works if the current role is sales manager or a admin.
 
     const { data: myFollowUps } = useQuery({
         queryKey: ["my-followups"],
         queryFn: getMyPendingFollowUps,
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        },
         enabled: roleName === "Sales Rep",
     }); // only works for sales reps.
 
 
     const acquireMutation = useMutation({
         mutationFn: (leadId: number) => { setSelectedLeadId(leadId); return acquireLead(leadId); },
-        onSuccess: () => {
-            toast.success("Lead acquired successfully!");
+        onSuccess: ({ data, message }) => {
+            if (!data) {
+                toast.error(message);
+                setSelectedLeadId(null);
+                return;
+            }
+            toast.success(message);
             queryClient.invalidateQueries({ queryKey: ["open-pool-leads"] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
             queryClient.invalidateQueries({ queryKey: ["leads"] });
@@ -91,8 +112,12 @@ export const Dashboard = () => {
 
     const completeFollowUpMutation = useMutation({
         mutationFn: (id: number) => updateFollowUpStatus(id, "Completed"),
-        onSuccess: () => {
-            toast.success("Follow-up marked as completed!");
+        onSuccess: ({ data, message }) => {
+            if (!data) {
+                toast.error(message);
+                return;
+            }
+            toast.success(message);
             queryClient.invalidateQueries({ queryKey: ["my-followups"] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
         }

@@ -5,6 +5,13 @@ import { Link } from "react-router";
 
 export const TopNavbar = () => {
     const user = useUser((state) => state.user);
+    const handleLogout = () => {
+        void logout()
+            .then(({ data, message }) => {
+                if (data) console.info(message);
+            })
+            .catch((error) => console.error("Failed to log out.", error));
+    };
 
     const getRoleBadge = (roleName?: string) => {
         switch (roleName) {
@@ -64,7 +71,7 @@ export const TopNavbar = () => {
 
                 {/* Logout Button */}
                 <button
-                    onClick={logout}
+                    onClick={handleLogout}
                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-200"
                     title="Sign Out"
                 >

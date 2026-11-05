@@ -31,7 +31,8 @@ function App() {
 
       setLoading(true);
       try {
-        const user = await getMe();
+        const { data: user, message } = await getMe();
+        console.info(message);
         setUserStore(user);
       } catch (e: any) {
         console.error("Error fetching user:", e);

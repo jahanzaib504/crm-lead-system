@@ -1,4 +1,5 @@
 using Backend.Application.Dtos.Analytics;
+using Backend.Application.Dtos.Api;
 using Backend.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,9 +20,9 @@ public class AnalyticsController : ControllerBase
     }
 
     [HttpGet("dashboard")]
-    public async Task<ActionResult<AnalyticsResponseDto>> GetDashboardAnalytics()
+    public async Task<ActionResult<ApiResponse<AnalyticsResponseDto>>> GetDashboardAnalytics()
     {
         var result = await _analyticsService.GetDashboardAnalytics();
-        return Ok(result);
+        return Ok(new ApiResponse<AnalyticsResponseDto>(StatusCodes.Status200OK, "Dashboard analytics retrieved successfully", result));
     }
 }

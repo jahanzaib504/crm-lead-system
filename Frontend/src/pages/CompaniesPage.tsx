@@ -2,10 +2,16 @@ import LoaderAnimation from "../components/LoaderAnimation";
 import ErrorMessage from "../components/ErrorMessage";
 import { getCompanies } from "../services/companyService";
 import { useQuery } from "@tanstack/react-query";
-import type { Company } from "../types/Company";
 import { Layers } from "lucide-react";
 const CompaniesPage = () => {
-    const { data: companies, isPending, error } = useQuery<Company[]>({ queryKey: ["companies"], queryFn: getCompanies });
+    const { data: companies, isPending, error } = useQuery({
+        queryKey: ["companies"],
+        queryFn: getCompanies,
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        }
+    });
 
     if (isPending) return <LoaderAnimation />;
     if (error) return <ErrorMessage message="Failed to load companies." />;

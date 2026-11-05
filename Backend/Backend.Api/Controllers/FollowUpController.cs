@@ -1,4 +1,5 @@
 using Backend.Application.Dtos.FollowUp;
+using Backend.Application.Dtos.Api;
 using Backend.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,37 +21,43 @@ public class FollowUpController : ControllerBase
     }
 
     [HttpGet("lead/{leadId}")]
-    public async Task<ActionResult<IEnumerable<FollowUpResponseDto>>> GetByLead(int leadId)
+    public async Task<ActionResult<ApiResponse<IEnumerable<FollowUpResponseDto>>>> GetByLead(int leadId)
     {
         var res = await _followUpService.GetByLeadId(leadId);
-        return Ok(res);
+        return Ok(new ApiResponse<IEnumerable<FollowUpResponseDto>>(StatusCodes.Status200OK, "Follow-ups retrieved successfully", res));
     }
 
     [HttpGet("my-pending")]
-    public async Task<ActionResult<IEnumerable<FollowUpResponseDto>>> GetMyPending()
+    public async Task<ActionResult<ApiResponse<IEnumerable<FollowUpResponseDto>>>> GetMyPending()
     {
         var res = await _followUpService.GetMyPendingFollowUps();
-        return Ok(res);
+        return Ok(new ApiResponse<IEnumerable<FollowUpResponseDto>>(StatusCodes.Status200OK, "Pending follow-ups retrieved successfully", res));
     }
 
     [HttpPost]
-    public async Task<ActionResult<FollowUpResponseDto>> Create([FromBody] CreateFollowUpDto dto)
+    public async Task<ActionResult<ApiResponse<FollowUpResponseDto>>> Create([FromBody] CreateFollowUpDto dto)
     {
         var res = await _followUpService.CreateFollowUp(dto);
-        return Ok(res);
+        var response = new ApiResponse<FollowUpResponseDto>(StatusCodes.Status201Created, "Follow-up created successfully", res);
+        return StatusCode(StatusCodes.Status201Created, response);
     }
 
     [HttpPatch("{id}/status")]
-    public async Task<ActionResult<bool>> UpdateStatus(int id, [FromBody] UpdateFollowUpStatusDto dto)
+    public async Task<ActionResult<ApiResponse<bool>>> UpdateStatus(int id, [FromBody] UpdateFollowUpStatusDto dto)
     {
         var res = await _followUpService.UpdateStatus(id, dto.Status);
-        return Ok(res);
+        return Ok(new ApiResponse<bool>(StatusCodes.Status200OK, "Follow-up status updated successfully", res));
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult<bool>> Delete(int id)
+    public async Task<ActionResult<ApiResponse<bool>>> Delete(int id)
     {
         var res = await _followUpService.DeleteFollowUp(id);
-        return Ok(res);
+        if (!res)
+        {
+            return NotFound(new ApiError { Status = StatusCodes.Status404NotFound, Message = "Follow-up not found." });
+        }
+
+        return Ok(new ApiResponse<bool>(StatusCodes.Status200OK, "Follow-up deleted successfully", res));
     }
 }

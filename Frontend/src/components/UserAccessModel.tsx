@@ -15,6 +15,10 @@ export const UserAccessModal = ({selectedUser, setSelectedUser}: {selectedUser: 
     const { data: managers } = useQuery({
         queryKey: ["admin-managers-list"],
         queryFn: getManagers,
+        select: ({ data, message }) => {
+            console.info(message);
+            return data;
+        },
         enabled: Boolean(selectedUser),
     });
     
@@ -22,8 +26,12 @@ export const UserAccessModal = ({selectedUser, setSelectedUser}: {selectedUser: 
     const updateAccessMutation = useMutation({
         mutationFn: ({ id, roleId, managerId, isActive }: { id: number; roleId: number; managerId: number | null; isActive: boolean }) =>
             approveUser(id, { roleId, managerId, isActive }),
-        onSuccess: () => {
-            toast.success("User access updated successfully!");
+        onSuccess: ({ data, message }) => {
+            if (!data) {
+                toast.error(message);
+                return;
+            }
+            toast.success(message);
             queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
             queryClient.invalidateQueries({ queryKey: ["admin-pending-users"] });

@@ -1,4 +1,4 @@
-namespace Backend.Application.Dtos;
+namespace Backend.Application.Dtos.Api;
 
 // Every error response uses this shape
 public class ApiError
