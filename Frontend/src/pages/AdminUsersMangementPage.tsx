@@ -12,7 +12,84 @@ import {
 } from "lucide-react";
 import { UserAccessModal } from "../components/UserAccessModel";
 
-// Admin user page is for user management, It can only be accessed by admin
+
+interface AccessControlButtonProps {
+  userId: number;
+  isAccessGranted: boolean;
+}
+
+export const AccessControlButton = ({
+  userId,
+  isAccessGranted,
+}: AccessControlButtonProps) => {
+  const queryClient = useQueryClient();
+
+  const handleSuccess = (message: string) => {
+    toast.success(message);
+    queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
+    queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
+  };
+
+  const handleError = (error: unknown) => {
+    const errMessage =
+      error instanceof Error ? error.message : "Operation failed";
+    toast.error(errMessage);
+  };
+
+  // Revoke Mutation
+  const revokeMutation = useMutation({
+    mutationFn: (id: number) => revokeAccess(id),
+    onSuccess: (res) => {
+      if (!res?.data) {
+        toast.error(res?.message || "Failed to revoke access.");
+        return;
+      }
+      handleSuccess(res.message || "Access revoked successfully.");
+    },
+    onError: handleError,
+  });
+
+  // Grant Mutation
+  const grantMutation = useMutation({
+    mutationFn: (id: number) => grantAccess(id),
+    onSuccess: (res) => {
+      if (!res?.data) {
+        toast.error(res?.message || "Failed to grant access.");
+        return;
+      }
+      handleSuccess(res.message || "Access granted successfully.");
+    },
+    onError: handleError,
+  });
+
+  const isPending = grantMutation.isPending || revokeMutation.isPending;
+
+  const handleClick = () => {
+    if (isAccessGranted) {
+      revokeMutation.mutate(userId);
+    } else {
+      grantMutation.mutate(userId);
+    }
+  };
+
+  return (
+    <button
+      disabled={isPending}
+      onClick={handleClick}
+      className={`px-2.5 py-1 text-xs font-semibold rounded-md transition hover:cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+        isAccessGranted
+          ? "border border-red-200 text-red-600 hover:bg-red-50"
+          : "border border-green-200 text-green-600 hover:bg-green-50"
+      }`}
+    >
+      {isPending
+        ? "Processing..."
+        : isAccessGranted
+        ? "Deactivate"
+        : "Activate"}
+    </button>
+  );
+};
 
 export const AdminUsersManagementPage = () => {
     const queryClient = useQueryClient();
@@ -23,7 +100,7 @@ export const AdminUsersManagementPage = () => {
     const [searchTerm, setSearchTerm] = useState(""); // Allows searching across records
 
     const [selectedUser, setSelectedUser] = useState<any>(null);
-    const [loadingId, setLoadingId] = useState<number | null>(null);
+    
 
     // Queries
     const { data: pendingUsers, isPending: pendingLoading } = useQuery({
@@ -48,35 +125,7 @@ export const AdminUsersManagementPage = () => {
 
 
 
-    const revokeMutation = useMutation({
-        mutationFn: (id: number) => revokeAccess(id),
-        onSuccess: ({ data, message }) => {
-            if (!data) {
-                toast.error(message);
-                setLoadingId(null);
-                return;
-            }
-            setLoadingId(null);
-            toast.success(message);
-            queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
-            queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
-        }
-    });
 
-    const grantMutation = useMutation({ // Revoking user access will change pending users in dashboard
-        mutationFn: (id: number) => grantAccess(id),
-        onSuccess: ({ data, message }) => {
-            if (!data) {
-                toast.error(message);
-                setLoadingId(null);
-                return;
-            }
-            setLoadingId(null);
-            toast.success(message);
-            queryClient.invalidateQueries({ queryKey: ["admin-all-users"] });
-            queryClient.invalidateQueries({ queryKey: ["dashboard-analytics"] });
-        }
-    });
 
 
     const filteredAllUsers = (allUsers || []).filter(u =>
@@ -240,31 +289,9 @@ export const AdminUsersManagementPage = () => {
                                             </td>
                                             <td className="px-6 py-4 text-right space-x-2">
                                                
-                                                {u.id !== currentUser?.id && (
-                                                    u.isActive ? (
-                                                        <button
-                                                            disabled={loadingId === u.id}
-                                                            onClick={() => {
-                                                                setLoadingId(u.id);
-                                                                revokeMutation.mutate(u.id);
-                                                            }}
-                                                            className="hover:cursor-pointer px-2.5 py-1 text-xs font-semibold rounded-md border border-red-200 text-red-600 hover:bg-red-50 transition"
-                                                        >
-                                                            {(loadingId === u.id) ? "Deactivating..." : "Deactivate"}
-                                                        </button>
-                                                    ) : (
-                                                        <button
-                                                            disabled={loadingId === u.id}
-                                                            onClick={() => {
-                                                                setLoadingId(u.id);
-                                                                grantMutation.mutate(u.id);
-                                                            }}
-                                                            className="hover:cursor-pointer px-2.5 py-1 text-xs font-semibold rounded-md border border-emerald-200 text-emerald-600 hover:bg-emerald-50 transition"
-                                                        >
-                                                            {(loadingId === u.id) ? "Activating..." : "Activate"}
-                                                        </button>
-                                                    )
-                                                )}
+                                                {u.id !== currentUser?.id && 
+                                                    <AccessControlButton userId={u.id} isAccessGranted={u.isActive} />    
+                                                }
                                                 {u.id!=currentUser?.id  && 
                                                     <button 
                                                         onClick={() => {
