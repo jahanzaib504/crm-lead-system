@@ -341,6 +341,9 @@ GO
 
 -- Constraints Removal
 alter table users alter column RoleId int null;
+ALTER TABLE users
+ADD CONSTRAINT DF_users_RoleId
+DEFAULT NULL FOR RoleId;
 
 -- ============================================================================
 -- VERIFICATION QUERY

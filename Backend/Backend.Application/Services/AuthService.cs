@@ -23,7 +23,7 @@ public class AuthService
             Email = user.Email,
             RoleId = user.RoleId,
 
-            Role = new RoleDto { Id = user.Role.Id, Name = user.Role.Name },
+            Role = user.RoleId != null ? new RoleDto { Id = user.Role.Id, Name = user.Role.Name } : null,
 
             ManagerId = user.ManagerId,
             ManagerName = user.Manager?.FullName,

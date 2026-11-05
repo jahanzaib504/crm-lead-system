@@ -77,11 +77,12 @@ public class UserService : IUserService
         {
             throw new NotFoundException("User does not exist.");
         }
-
+        // User can only assign a role if they don't already have one. Once a role is assigned, it cannot be changed.
         if(user.RoleId.HasValue && user.RoleId.Value != dto.RoleId) 
         {
             throw new ConflictException("Cannot reassign role to an already assigned user.");
         }
+        
         // Validate manager if provided
         if (dto.ManagerId.HasValue)
         {
@@ -96,7 +97,7 @@ public class UserService : IUserService
 
         if (dto.RoleId == 2) // Admin is manager of sales manager
             user.ManagerId = _userManager.GetCurrentUserId() ?? null;
-        else if (dto.RoleId == 3 && dto.ManagerId.HasValue) // 
+        else if (dto.RoleId == 3 && dto.ManagerId.HasValue) // Sales rep can have a manager assigned
             user.ManagerId = dto.ManagerId;
         else
             user.ManagerId = null; // If the user is admin than he cannot have a manager
@@ -123,6 +124,11 @@ public class UserService : IUserService
     public async Task<bool> GrantAccessToUser(int id)
     {
         var currentUserId = _userManager.GetCurrentUserId();
+        var currentRole = _userManager.GetCurrentUserRole();
+        if(currentRole != "Admin")
+        {
+            throw new UnauthorizedException("You are not authorized to grant access to this user.");
+        }
         if (!currentUserId.HasValue)
         {
             throw new UnauthorizedException("Current user is not authenticated.");
@@ -138,7 +144,11 @@ public class UserService : IUserService
         {
             throw new NotFoundException("User does not exist");
         }
-
+        // Only user with a role can be granted access
+        if(user.RoleId == null)
+        {
+            throw new ConflictException("Cannot grant access to a user without an assigned role.");
+        }
         user.IsActive = true;
         user.UpdatedAt = DateTime.UtcNow;
         user.UpdatedBy = _userManager.GetCurrentUserEmail() ?? "Admin";
@@ -157,28 +167,41 @@ public class UserService : IUserService
     {
         var currentUserId = _userManager.GetCurrentUserId();
         var currentRole = _userManager.GetCurrentUserRole();
+        var currentRoleId = _userManager.GetCurrentUserRoleId();
+
+
         if (!currentUserId.HasValue)
         {
             throw new UnauthorizedException("Current user is not authenticated.");
+        }
+
+
+        if(currentRole != "Admin")
+        {
+            throw new UnauthorizedException("You are not authorized to revoke access for this user.");
         }
 
         if(currentUserId == id)
         {
             throw new ConflictException("You cannot revoke access to yourself.");
         }
-
+        
         var user = await _userRepo.GetByIdAsync(id);
         if (user == null)
         {
             throw new NotFoundException("User does not exist");
         }
 
-        // Admin can revoke anyone; Manager can only revoke their own reps
-        if (currentRole != "Admin" && user.ManagerId != currentUserId.Value)
+        // Admin can revoke anyone
+        if (currentRole != "Admin")
         {
             throw new UnauthorizedException("You are not authorized to revoke access for this user.");
         }
 
+        if(user.RoleId == null)
+        {
+            throw new ConflictException("Cannot revoke access for a user without an assigned role.");
+        }
         user.IsActive = false;
         user.UpdatedAt = DateTime.UtcNow;
         user.UpdatedBy = _userManager.GetCurrentUserEmail() ?? "Admin";
@@ -218,12 +241,12 @@ public class UserService : IUserService
 
         if (currentUserRole == "Admin")
         {
-            return users.Select(MapToDto);
+            return users.Where(u => u.RoleId.HasValue).Select(MapToDto);
         }
 
         if (currentUserRole == "Sales Manager")
         {
-            return users.Where(u => u.ManagerId == currentUserId).Select(MapToDto);
+            return users.Where(u => u.RoleId.HasValue && u.ManagerId == currentUserId).Select(MapToDto);
         }
 
         return Enumerable.Empty<UserResponseDto>();
@@ -231,12 +254,23 @@ public class UserService : IUserService
 
     public async Task<IEnumerable<UserResponseDto>> GetPendingUsers()
     {
+        // only admin can see pending users
+        var currentRole = _userManager.GetCurrentUserRole();
+        if (currentRole != "Admin")
+        {
+            throw new UnauthorizedException("You are not authorized to view pending users.");
+        }
         var users = await _userRepo.GetAllAsync();
         return users.Where(u => !u.RoleId.HasValue).Select(MapToDto); // Get all non-approved users (users without a role)
     }
 
     public async Task<IEnumerable<UserResponseDto>> GetManagers()
     {
+        var currentRole = _userManager.GetCurrentUserRole();
+        if (currentRole != "Admin")
+        {
+            throw new UnauthorizedException("You are not authorized to view managers.");
+        }
         var users = await _userRepo.GetAllAsync();
         // Return active Sales Managers (role 2)
         return users.Where(u => u.IsActive && u.RoleId == 2).Select(MapToDto);

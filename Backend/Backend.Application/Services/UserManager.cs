@@ -9,6 +9,7 @@ public interface IUserManager
     string? GetCurrentUserEmail();
     string? GetCurrentUserRole();
     string? GetCurrentUserName();
+    int? GetCurrentUserRoleId();
 }
 
 namespace Backend.Application.Services
@@ -56,6 +57,17 @@ namespace Backend.Application.Services
             return user?.FindFirst(ClaimTypes.Name)?.Value 
                 ?? user?.FindFirst("name")?.Value 
                 ?? GetCurrentUserEmail();
+        }
+        public int? GetCurrentUserRoleId()
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            var roleIdClaim = user?.FindFirst("role_id")?.Value;
+
+            if (int.TryParse(roleIdClaim, out int roleId))
+            {
+                return roleId;
+            }
+            return null;
         }
     }
 }

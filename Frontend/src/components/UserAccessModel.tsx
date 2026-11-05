@@ -7,10 +7,14 @@ import type { User } from "../types/User";
 
 export const UserAccessModal = ({selectedUser, setSelectedUser}: {selectedUser: User, setSelectedUser: any}) => {
     const queryClient = useQueryClient();
-    const [roleId, setRoleId] = useState<number>(selectedUser.roleId ?? 3); // Default to Sales Rep if roleId is null
+    const [roleId, setRoleId] = useState<number | undefined>(selectedUser.roleId ?? 3); // Default to Sales Rep if roleId is null
     const [managerId, setManagerId] = useState<number | null>(selectedUser.managerId ?? null);
     const [isActive, setIsActive] = useState<boolean>(selectedUser.isActive ?? true);
-            
+    
+    // If any of the fields are unchanged, disable the save button
+    function isSaveDisabled() {
+        return selectedUser.roleId == null && selectedUser.roleId == roleId && roleId === selectedUser.roleId && managerId == selectedUser.managerId; 
+    }
 
     const { data: managers } = useQuery({
         queryKey: ["admin-managers-list"],
@@ -59,7 +63,7 @@ export const UserAccessModal = ({selectedUser, setSelectedUser}: {selectedUser: 
                     <h3 className="text-base font-bold text-gray-900">
                         {selectedUser.roleId !== null ? "Edit User Permissions" : "Approve User Access"}
                     </h3>
-                    <button onClick={() => setSelectedUser(null)} className="text-gray-400 hover:text-gray-600">
+                    <button onClick={() => setSelectedUser(null)} className="text-gray-400 hover:text-gray-600" disabled={updateAccessMutation.isPending}>
                         <X className="w-5 h-5" />
                     </button>
                 </div>
@@ -87,7 +91,7 @@ export const UserAccessModal = ({selectedUser, setSelectedUser}: {selectedUser: 
                         </select>
                     </div>}
 
-                    {Number(roleId) === 3 && (
+                    {roleId && Number(roleId) === 3 && (
                         <div>
                             <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
                                 Assigned Sales Manager
@@ -132,7 +136,7 @@ export const UserAccessModal = ({selectedUser, setSelectedUser}: {selectedUser: 
                         </button>
                         <button
                             type="submit"
-                            disabled={updateAccessMutation.isPending}
+                            disabled={isSaveDisabled() || updateAccessMutation.isPending}
                             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition disabled:opacity-50"
                         >
                             {updateAccessMutation.isPending ? "Saving..." : "Save Settings"}
