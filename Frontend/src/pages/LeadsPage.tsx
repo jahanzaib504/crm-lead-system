@@ -11,6 +11,7 @@ import {
     Building2, 
     PlusCircle
 } from "lucide-react";
+import { useDebounce } from "../hooks/useDebounce";
 
 const STAGES = [
     { id: 0, name: "All Stages" },
@@ -46,9 +47,10 @@ export const LeadsPage = ({ openPoolOnly = false }: LeadsPageProps) => {
     const roleName = currentUser?.role?.name;
     const queryClient = useQueryClient();
 
+    const debouncedSearchTerm = useDebounce(searchTerm, 300); // Debounce search term to reduce API calls
     const { data, isPending, isError } = useQuery({
-        queryKey: ["leads", page, pageSize, searchTerm, selectedStage, poolFilter],
-        queryFn: () => getLeadsPaged(page, pageSize, searchTerm, selectedStage || undefined, poolFilter),
+        queryKey: ["leads", page, pageSize, debouncedSearchTerm, selectedStage, poolFilter],
+        queryFn: () => getLeadsPaged(page, pageSize, debouncedSearchTerm, selectedStage || undefined, poolFilter),
         select: ({ data, message }) => {
             console.info(message);
             return data;
